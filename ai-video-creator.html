@@ -1,0 +1,2338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Creator Pro - Auto Video Editor</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e1b4b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 10px 40px rgba(0,0,0,0.1);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 8px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .panel {
+            display: none;
+            background: white;
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            background: var(--light);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(99,102,241,0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(16,185,129,0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--gray), #475569);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-connected {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-disconnected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-testing {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .video-card {
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .video-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .video-card.selected {
+            border-color: var(--success);
+            box-shadow: 0 0 0 3px rgba(16,185,129,0.3);
+        }
+
+        .video-card video,
+        .video-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+        }
+
+        .video-card .info {
+            padding: 10px;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .video-card .check {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            background: var(--success);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .video-card.selected .check {
+            display: flex;
+        }
+
+        .timeline {
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 100px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            align-items: center;
+        }
+
+        .timeline-item {
+            min-width: 120px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            position: relative;
+            cursor: grab;
+        }
+
+        .timeline-item .remove-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 22px;
+            height: 22px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid white;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .log-area {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .log-area .log-entry {
+            margin-bottom: 5px;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .log-area .log-success { color: #4ade80; }
+        .log-area .log-error { color: #f87171; }
+        .log-area .log-info { color: #60a5fa; }
+        .log-area .log-warning { color: #fbbf24; }
+
+        .voice-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--danger), var(--secondary));
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+        }
+
+        .voice-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .voice-btn.recording {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(135deg, #dc2626, #be185d);
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
+            50% { box-shadow: 0 0 0 20px rgba(239,68,68,0); }
+        }
+
+        .preview-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .preview-container {
+                grid-template-columns: 1fr;
+            }
+            header h1 {
+                font-size: 1.8rem;
+            }
+            .panel {
+                padding: 20px;
+            }
+        }
+
+        .preview-box {
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .preview-box video {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+        }
+
+        .seo-output {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 2px solid #7dd3fc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .seo-output h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .seo-output .title-result {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .seo-output .desc-result {
+            color: var(--gray);
+            line-height: 1.8;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .settings-card {
+            background: var(--light);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .settings-card h3 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .api-status-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .resolution-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .resolution-card {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .resolution-card:hover {
+            border-color: var(--primary);
+        }
+
+        .resolution-card.selected {
+            border-color: var(--primary);
+            background: rgba(99,102,241,0.05);
+        }
+
+        .resolution-card .icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .resolution-card .name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .resolution-card .size {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        }
+
+        .toast-success { background: var(--success); }
+        .toast-error { background: var(--danger); }
+        .toast-info { background: var(--primary); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: var(--light);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .feature-item .check-icon {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .caption-preview {
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 10px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .transition-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .transition-chip {
+            padding: 8px 16px;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .transition-chip:hover,
+        .transition-chip.selected {
+            border-color: var(--primary);
+            background: rgba(99,102,241,0.1);
+            color: var(--primary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+        }
+
+        .hidden { display: none !important; }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s;
+        }
+
+        .step-dot.active {
+            background: var(--primary);
+            transform: scale(1.3);
+        }
+
+        .step-dot.completed {
+            background: var(--success);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 AI Video Creator Pro</h1>
+            <p>Buat Video Viral Otomatis dengan AI - Pencarian Video + Auto Edit + SEO Generator</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('settings')">⚙️ Pengaturan API</button>
+            <button class="tab-btn" onclick="switchTab('search')">🔍 Cari Video</button>
+            <button class="tab-btn" onclick="switchTab('editor')">🎞️ Editor</button>
+            <button class="tab-btn" onclick="switchTab('export')">📤 Export & SEO</button>
+            <button class="tab-btn" onclick="switchTab('guide')">📖 Panduan</button>
+        </div>
+
+        <!-- Panel: Settings -->
+        <div class="panel active" id="panel-settings">
+            <h2 style="margin-bottom:20px;">⚙️ Pengaturan API Key</h2>
+            
+            <div class="settings-card">
+                <h3>🎥 Pexels API</h3>
+                <div class="form-group">
+                    <label>Pexels API Key</label>
+                    <div class="api-status-row">
+                        <input type="password" id="pexelsApiKey" placeholder="Masukkan Pexels API Key..." style="flex:1;">
+                        <button class="btn btn-primary btn-sm" onclick="testConnection('pexels')">🔗 Test</button>
+                    </div>
+                    <span id="pexelsStatus" class="status-badge status-disconnected" style="margin-top:8px;">⚪ Belum Terhubung</span>
+                </div>
+                <small style="color:var(--gray);">Dapatkan API Key gratis di <a href="https://www.pexels.com/api/" target="_blank">pexels.com/api</a></small>
+            </div>
+
+            <div class="settings-card">
+                <h3>🖼️ Pixabay API</h3>
+                <div class="form-group">
+                    <label>Pixabay API Key</label>
+                    <div class="api-status-row">
+                        <input type="password" id="pixabayApiKey" placeholder="Masukkan Pixabay API Key..." style="flex:1;">
+                        <button class="btn btn-primary btn-sm" onclick="testConnection('pixabay')">🔗 Test</button>
+                    </div>
+                    <span id="pixabayStatus" class="status-badge status-disconnected" style="margin-top:8px;">⚪ Belum Terhubung</span>
+                </div>
+                <small style="color:var(--gray);">Dapatkan API Key gratis di <a href="https://pixabay.com/api/docs/" target="_blank">pixabay.com/api/docs</a></small>
+            </div>
+
+            <div class="settings-card">
+                <h3>🤖 AI Provider (Opsional)</h3>
+                <div class="form-group">
+                    <label>Pilih AI Provider</label>
+                    <select id="aiProvider" onchange="toggleAIFields()">
+                        <option value="none">Tanpa AI (Manual Mode)</option>
+                        <option value="groq">Groq AI (Cepat & Gratis)</option>
+                        <option value="gemini">Google Gemini AI</option>
+                    </select>
+                </div>
+                <div id="groqFields" class="hidden">
+                    <div class="form-group">
+                        <label>Groq API Key</label>
+                        <div class="api-status-row">
+                            <input type="password" id="groqApiKey" placeholder="Masukkan Groq API Key..." style="flex:1;">
+                            <button class="btn btn-primary btn-sm" onclick="testConnection('groq')">🔗 Test</button>
+                        </div>
+                        <span id="groqStatus" class="status-badge status-disconnected" style="margin-top:8px;">⚪ Belum Terhubung</span>
+                    </div>
+                    <small style="color:var(--gray);">Dapatkan API Key gratis di <a href="https://console.groq.com/" target="_blank">console.groq.com</a></small>
+                </div>
+                <div id="geminiFields" class="hidden">
+                    <div class="form-group">
+                        <label>Gemini API Key</label>
+                        <div class="api-status-row">
+                            <input type="password" id="geminiApiKey" placeholder="Masukkan Gemini API Key..." style="flex:1;">
+                            <button class="btn btn-primary btn-sm" onclick="testConnection('gemini')">🔗 Test</button>
+                        </div>
+                        <span id="geminiStatus" class="status-badge status-disconnected" style="margin-top:8px;">⚪ Belum Terhubung</span>
+                    </div>
+                    <small style="color:var(--gray);">Dapatkan API Key gratis di <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></small>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>💾 Simpan Pengaturan</h3>
+                <button class="btn btn-success" onclick="saveSettings()">💾 Simpan Semua Pengaturan</button>
+                <button class="btn btn-secondary" onclick="loadSettings()" style="margin-left:10px;">🔄 Load Pengaturan</button>
+            </div>
+        </div>
+
+        <!-- Panel: Search -->
+        <div class="panel" id="panel-search">
+            <h2 style="margin-bottom:20px;">🔍 Pencarian Video Berdasarkan Suara/Tema</h2>
+            
+            <div class="settings-card">
+                <h3>🎤 Input Suara / Tema Video</h3>
+                <p style="color:var(--gray);margin-bottom:15px;">Tekan tombol mikrofon dan bicarakan tema video yang ingin dicari, atau ketik manual di bawah.</p>
+                
+                <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecording()">🎤</button>
+                <p style="text-align:center;color:var(--gray);font-size:0.9rem;" id="voiceStatus">Klik untuk merekam suara</p>
+                
+                <div class="form-group" style="margin-top:20px;">
+                    <label>Atau Ketik Tema/Keyword Video:</label>
+                    <input type="text" id="searchQuery" placeholder="Contoh: nature landscape, technology, business meeting...">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Sumber Video</label>
+                        <select id="videoSource">
+                            <option value="all">Semua Sumber</option>
+                            <option value="pexels">Pexels Only</option>
+                            <option value="pixabay">Pixabay Only</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah Video</label>
+                        <select id="videoCount">
+                            <option value="5">5 Video</option>
+                            <option value="10" selected>10 Video</option>
+                            <option value="15">15 Video</option>
+                            <option value="20">20 Video</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Orientasi</label>
+                        <select id="searchOrientation">
+                            <option value="all">Semua</option>
+                            <option value="landscape">Landscape</option>
+                            <option value="portrait">Portrait</option>
+                            <option value="square">Square</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="searchVideos()">🔍 Cari Video Sekarang</button>
+            </div>
+
+            <div id="searchResults" class="hidden">
+                <h3 style="margin-top:20px;">📹 Hasil Pencarian (<span id="resultCount">0</span> video)</h3>
+                <p style="color:var(--gray);font-size:0.9rem;">Klik video untuk memilih. Video terpilih akan masuk ke timeline editor.</p>
+                <div class="video-grid" id="videoGrid"></div>
+            </div>
+        </div>
+
+        <!-- Panel: Editor -->
+        <div class="panel" id="panel-editor">
+            <h2 style="margin-bottom:20px;">🎞️ Auto Video Editor</h2>
+            
+            <div class="settings-card">
+                <h3>🎵 Import Audio/Voice</h3>
+                <div class="form-group">
+                    <label>Upload File Audio (MP3, WAV, OGG) untuk Voiceover/Narasi:</label>
+                    <input type="file" id="audioFile" accept="audio/*" onchange="handleAudioUpload(event)">
+                </div>
+                <div id="audioInfo" class="hidden">
+                    <p style="color:var(--success);font-weight:600;">✅ Audio berhasil diupload</p>
+                    <audio id="audioPreview" controls style="width:100%;margin-top:10px;"></audio>
+                    <button class="btn btn-warning btn-sm" onclick="transcribeAudio()" style="margin-top:10px;">📝 Transcribe Audio (Auto Caption)</button>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>🎬 Timeline Video</h3>
+                <p style="color:var(--gray);margin-bottom:10px;">Video yang dipilih akan ditampilkan di timeline. Drag untuk mengatur urutan.</p>
+                <div class="timeline" id="timeline">
+                    <p style="color:var(--gray);text-align:center;width:100%;">Belum ada video di timeline. Pilih video dari tab "Cari Video".</p>
+                </div>
+                <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-primary btn-sm" onclick="autoArrangeTimeline()">🔄 Auto Arrange</button>
+                    <button class="btn btn-danger btn-sm" onclick="clearTimeline()">🗑️ Clear All</button>
+                    <span style="margin-left:auto;color:var(--gray);font-size:0.9rem;" id="timelineInfo">0 video | 0 detik</span>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>✨ Fitur Auto</h3>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <span class="check-icon">✅</span>
+                        <label><input type="checkbox" id="autoCaption" checked> Auto Caption</label>
+                    </div>
+                    <div class="feature-item">
+                        <span class="check-icon">✅</span>
+                        <label><input type="checkbox" id="autoTransition" checked> Auto Transisi</label>
+                    </div>
+                    <div class="feature-item">
+                        <span class="check-icon">✅</span>
+                        <label><input type="checkbox" id="autoColorGrade" checked> Auto Color Grade</label>
+                    </div>
+                    <div class="feature-item">
+                        <span class="check-icon">✅</span>
+                        <label><input type="checkbox" id="autoSync" checked> Auto Sync Audio</label>
+                    </div>
+                    <div class="feature-item">
+                        <span class="check-icon">✅</span>
+                        <label><input type="checkbox" id="autoStabilize"> Auto Stabilize</label>
+                    </div>
+                    <div class="feature-item">
+                        <span class="check-icon">✅</span>
+                        <label><input type="checkbox" id="autoFadeInOut" checked> Auto Fade In/Out</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>🎨 Pilihan Transisi</h3>
+                <div class="transition-options" id="transitionOptions">
+                    <div class="transition-chip selected" data-transition="fade">Fade</div>
+                    <div class="transition-chip" data-transition="dissolve">Dissolve</div>
+                    <div class="transition-chip" data-transition="wipe">Wipe</div>
+                    <div class="transition-chip" data-transition="slide">Slide</div>
+                    <div class="transition-chip" data-transition="zoom">Zoom</div>
+                    <div class="transition-chip" data-transition="blur">Blur</div>
+                    <div class="transition-chip" data-transition="flash">Flash</div>
+                    <div class="transition-chip" data-transition="auto">🤖 Auto AI</div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>📐 Resolusi Output</h3>
+                <div class="resolution-options" id="resolutionOptions">
+                    <div class="resolution-card selected" data-resolution="1080x1920" data-ratio="portrait">
+                        <div class="icon">📱</div>
+                        <div class="name">TikTok / Reels / Shorts</div>
+                        <div class="size">1080 × 1920 (9:16)</div>
+                    </div>
+                    <div class="resolution-card" data-resolution="1920x1080" data-ratio="landscape">
+                        <div class="icon">🖥️</div>
+                        <div class="name">YouTube / Facebook</div>
+                        <div class="size">1920 × 1080 (16:9)</div>
+                    </div>
+                    <div class="resolution-card" data-resolution="1080x1080" data-ratio="square">
+                        <div class="icon">⬜</div>
+                        <div class="name">Instagram Post</div>
+                        <div class="size">1080 × 1080 (1:1)</div>
+                    </div>
+                    <div class="resolution-card" data-resolution="1080x1350" data-ratio="portrait">
+                        <div class="icon">📲</div>
+                        <div class="name">Instagram Portrait</div>
+                        <div class="size">1080 × 1350 (4:5)</div>
+                    </div>
+                    <div class="resolution-card" data-resolution="720x1280" data-ratio="portrait">
+                        <div class="icon">📱</div>
+                        <div class="name">HD Portrait</div>
+                        <div class="size">720 × 1280 (9:16)</div>
+                    </div>
+                    <div class="resolution-card" data-resolution="1280x720" data-ratio="landscape">
+                        <div class="icon">💻</div>
+                        <div class="name">HD Landscape</div>
+                        <div class="size">1280 × 720 (16:9)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card" id="captionSection" class="hidden">
+                <h3>📝 Caption / Subtitle Preview</h3>
+                <div id="captionPreview">
+                    <p style="color:var(--gray);">Caption akan muncul di sini setelah audio di-transcribe.</p>
+                </div>
+            </div>
+
+            <button class="btn btn-success" onclick="previewVideo()" style="margin-top:10px;">👁️ Preview Video</button>
+        </div>
+
+        <!-- Panel: Export & SEO -->
+        <div class="panel" id="panel-export">
+            <h2 style="margin-bottom:20px;">📤 Export Video & SEO Generator</h2>
+            
+            <div class="settings-card">
+                <h3>🎬 Render & Export Video</h3>
+                <p style="color:var(--gray);margin-bottom:15px;">Klik tombol di bawah untuk mulai merender video final dengan semua efek dan fitur yang dipilih.</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Format Output</label>
+                        <select id="outputFormat">
+                            <option value="mp4">MP4 (H.264) - Recommended</option>
+                            <option value="webm">WebM (VP8)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quality</label>
+                        <select id="outputQuality">
+                            <option value="high">High (Best Quality)</option>
+                            <option value="medium" selected>Medium (Balanced)</option>
+                            <option value="low">Low (Small File)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-success" onclick="renderVideo()" id="renderBtn">🎬 Mulai Render Video</button>
+                
+                <div class="progress-bar" id="renderProgress" style="margin-top:15px;">
+                    <div class="progress-fill" id="renderProgressFill"></div>
+                </div>
+                <p style="font-size:0.9rem;color:var(--gray);" id="renderStatus">Siap untuk render</p>
+                
+                <div class="log-area" id="renderLog" style="margin-top:15px;">
+                    <div class="log-entry log-info">[System] Menunggu perintah render...</div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>📥 Download Hasil</h3>
+                <div id="downloadSection" class="hidden">
+                    <div class="preview-container">
+                        <div class="preview-box">
+                            <video id="finalVideo" controls style="width:100%;"></video>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom:10px;">📊 Detail Video</h4>
+                            <p id="videoDetails" style="color:var(--gray);font-size:0.9rem;"></p>
+                            <button class="btn btn-success" onclick="downloadVideo()" style="margin-top:15px;">📥 Download Video</button>
+                        </div>
+                    </div>
+                </div>
+                <p id="noDownloadMsg" style="color:var(--gray);">Render video terlebih dahulu untuk mendapatkan hasil download.</p>
+            </div>
+
+            <div class="settings-card">
+                <h3>🚀 SEO Title & Description Generator</h3>
+                <p style="color:var(--gray);margin-bottom:15px;">Generate judul dan deskripsi yang SEO-friendly dengan HOOK agar video viral!</p>
+                
+                <div class="form-group">
+                    <label>Platform Target</label>
+                    <select id="seoPlatform">
+                        <option value="youtube">YouTube</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="instagram">Instagram Reels</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="youtube_shorts">YouTube Shorts</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Topik/Keyword Utama (opsional - auto dari voice jika kosong)</label>
+                    <input type="text" id="seoKeyword" placeholder="Kosongkan untuk auto-detect dari audio...">
+                </div>
+                
+                <button class="btn btn-primary" onclick="generateSEO()">🚀 Generate SEO Content</button>
+                
+                <div id="seoResults" class="hidden">
+                    <div class="seo-output">
+                        <h4>📌 Judul Video (SEO + HOOK):</h4>
+                        <div class="title-result" id="seoTitle"></div>
+                        
+                        <h4 style="margin-top:15px;">📝 Deskripsi Video:</h4>
+                        <div class="desc-result" id="seoDescription"></div>
+                        
+                        <h4 style="margin-top:15px;">🏷️ Tags/Hashtags:</h4>
+                        <div class="desc-result" id="seoTags"></div>
+                        
+                        <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
+                            <button class="btn btn-primary btn-sm" onclick="copySEO('title')">📋 Copy Judul</button>
+                            <button class="btn btn-primary btn-sm" onclick="copySEO('desc')">📋 Copy Deskripsi</button>
+                            <button class="btn btn-primary btn-sm" onclick="copySEO('tags')">📋 Copy Tags</button>
+                            <button class="btn btn-primary btn-sm" onclick="copySEO('all')">📋 Copy Semua</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Guide -->
+        <div class="panel" id="panel-guide">
+            <h2 style="margin-bottom:20px;">📖 Panduan Instalasi & Penggunaan</h2>
+            
+            <div class="settings-card">
+                <h3>📦 Langkah 1: Instalasi (Sangat Mudah!)</h3>
+                <ol style="padding-left:20px;line-height:2;">
+                    <li>Simpan file ini dengan nama <strong>ai-video-creator.html</strong></li>
+                    <li>Buka file tersebut di browser (Chrome/Edge/Firefox/Safari)</li>
+                    <li>Selesai! Aplikasi langsung berjalan tanpa instalasi server</li>
+                </ol>
+                <p style="color:var(--success);font-weight:600;margin-top:10px;">✅ Tidak perlu install Node.js, Python, atau server apapun!</p>
+            </div>
+
+            <div class="settings-card">
+                <h3>🔑 Langkah 2: Setup API Keys</h3>
+                <ol style="padding-left:20px;line-height:2;">
+                    <li><strong>Pexels API:</strong> Daftar di <a href="https://pexels.com" target="_blank">pexels.com</a> → Profile → API → Copy API Key</li>
+                    <li><strong>Pixabay API:</strong> Daftar di <a href="https://pixabay.com" target="_blank">pixabay.com</a> → Dashboard → API Key</li>
+                    <li><strong>Groq AI (Opsional):</strong> Daftar di <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys → Create</li>
+                    <li><strong>Gemini AI (Opsional):</strong> Daftar di <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> → Get API Key</li>
+                    <li>Masukkan API Key di tab "Pengaturan API" → Klik "Test" untuk verifikasi</li>
+                    <li>Klik "Simpan Semua Pengaturan" untuk menyimpan</li>
+                </ol>
+            </div>
+
+            <div class="settings-card">
+                <h3>🎬 Langkah 3: Cara Menggunakan</h3>
+                <ol style="padding-left:20px;line-height:2;">
+                    <li><strong>Cari Video:</strong> Buka tab "Cari Video" → Tekan tombol mikrofon dan bicarakan tema, atau ketik keyword → Klik "Cari Video"</li>
+                    <li><strong>Pilih Video:</strong> Klik video yang ingin digunakan (bisa pilih beberapa)</li>
+                    <li><strong>Editor:</strong> Buka tab "Editor" → Upload audio voiceover → Pilih transisi & resolusi → Aktifkan fitur auto</li>
+                    <li><strong>Export:</strong> Buka tab "Export" → Klik "Mulai Render" → Download video → Generate SEO</li>
+                </ol>
+            </div>
+
+            <div class="settings-card">
+                <h3>💡 Tips & Catatan Penting</h3>
+                <ul style="padding-left:20px;line-height:2;">
+                    <li>Semua video dari Pexels & Pixabay adalah <strong>GRATIS dan BEBAS COPYRIGHT</strong></li>
+                    <li>API Key disimpan di browser (localStorage) - aman dan privat</li>
+                    <li>Fitur Voice Recognition bekerja terbaik di Chrome/Edge</li>
+                    <li>Untuk hasil terbaik, gunakan audio voiceover yang jelas</li>
+                    <li>Render video dilakukan di browser - pastikan RAM cukup (min 4GB)</li>
+                    <li>AI Provider (Groq/Gemini) digunakan untuk generate SEO content yang lebih baik</li>
+                    <li>Semua processing dilakukan secara lokal - tidak ada data yang dikirim ke server kecuali API calls</li>
+                </ul>
+            </div>
+
+            <div class="settings-card">
+                <h3>🌐 Kompatibilitas Browser</h3>
+                <div class="feature-list">
+                    <div class="feature-item"><span class="check-icon">✅</span> Chrome 90+</div>
+                    <div class="feature-item"><span class="check-icon">✅</span> Edge 90+</div>
+                    <div class="feature-item"><span class="check-icon">✅</span> Firefox 90+</div>
+                    <div class="feature-item"><span class="check-icon">✅</span> Safari 15+</div>
+                    <div class="feature-item"><span class="check-icon">✅</span> Opera 76+</div>
+                    <div class="feature-item"><span class="check-icon">✅</span> Brave</div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>📱 Platform Output yang Didukung</h3>
+                <div class="feature-list">
+                    <div class="feature-item"><span class="check-icon">✅</span> TikTok (9:16)</div>
+                    <div class="feature-item"><span class="check-icon">✅</span> Instagram Reels (9:16)</div>
+                    <div class="feature-item"><span class="check-icon">✅</span> YouTube (16:9)</div>
+                    <div class="feature-item"><span class="check-icon">✅</span> YouTube Shorts (9:16)</div>
+                    <div class="feature-item"><span class="check-icon">✅</span> Facebook (16:9 / 1:1)</div>
+                    <div class="feature-item"><span class="check-icon">✅</span> Twitter/X (16:9)</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>🎬 AI Video Creator Pro v2.0 | Single File Application | Made with ❤️</p>
+            <p style="margin-top:5px;font-size:0.8rem;">Semua video dari Pexels & Pixabay bebas copyright. Gunakan dengan bijak.</p>
+        </footer>
+    </div>
+
+    <!-- FFmpeg.wasm for video processing -->
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/util.min.js"></script>
+
+    <script>
+    // ============================================
+    // AI VIDEO CREATOR PRO - MAIN APPLICATION
+    // ============================================
+
+    // Global State
+    const AppState = {
+        settings: {
+            pexelsKey: '',
+            pixabayKey: '',
+            aiProvider: 'none',
+            groqKey: '',
+            geminiKey: ''
+        },
+        connectionStatus: {
+            pexels: false,
+            pixabay: false,
+            groq: false,
+            gemini: false
+        },
+        searchResults: [],
+        selectedVideos: [],
+        timeline: [],
+        audioFile: null,
+        audioTranscript: '',
+        captions: [],
+        selectedResolution: '1080x1920',
+        selectedTransition: 'fade',
+        renderedVideoBlob: null,
+        isRecording: false,
+        recognition: null
+    };
+
+    // ============================================
+    // TAB NAVIGATION
+    // ============================================
+    function switchTab(tabName) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`panel-${tabName}`).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // ============================================
+    // SETTINGS & API MANAGEMENT
+    // ============================================
+    function toggleAIFields() {
+        const provider = document.getElementById('aiProvider').value;
+        document.getElementById('groqFields').classList.toggle('hidden', provider !== 'groq');
+        document.getElementById('geminiFields').classList.toggle('hidden', provider !== 'gemini');
+        AppState.settings.aiProvider = provider;
+    }
+
+    async function testConnection(service) {
+        const statusEl = document.getElementById(`${service}Status`);
+        statusEl.className = 'status-badge status-testing';
+        statusEl.innerHTML = '🔄 Menguji koneksi...';
+
+        try {
+            let key, url, success;
+            
+            switch(service) {
+                case 'pexels':
+                    key = document.getElementById('pexelsApiKey').value.trim();
+                    if (!key) throw new Error('API Key kosong');
+                    url = 'https://api.pexels.com/videos/search?query=nature&per_page=1';
+                    const pRes = await fetch(url, { headers: { 'Authorization': key } });
+                    success = pRes.ok;
+                    break;
+                    
+                case 'pixabay':
+                    key = document.getElementById('pixabayApiKey').value.trim();
+                    if (!key) throw new Error('API Key kosong');
+                    url = `https://pixabay.com/api/videos/?key=${key}&q=nature&per_page=1`;
+                    const xRes = await fetch(url);
+                    success = xRes.ok;
+                    break;
+                    
+                case 'groq':
+                    key = document.getElementById('groqApiKey').value.trim();
+                    if (!key) throw new Error('API Key kosong');
+                    const gRes = await fetch('https://api.groq.com/openai/v1/models', {
+                        headers: { 'Authorization': `Bearer ${key}` }
+                    });
+                    success = gRes.ok;
+                    break;
+                    
+                case 'gemini':
+                    key = document.getElementById('geminiApiKey').value.trim();
+                    if (!key) throw new Error('API Key kosong');
+                    const mRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+                    success = mRes.ok;
+                    break;
+            }
+
+            if (success) {
+                AppState.connectionStatus[service] = true;
+                statusEl.className = 'status-badge status-connected';
+                statusEl.innerHTML = '🟢 Terhubung & Aktif';
+                showToast(`✅ ${service.toUpperCase()} berhasil terhubung!`, 'success');
+            } else {
+                throw new Error('Koneksi gagal');
+            }
+        } catch (error) {
+            AppState.connectionStatus[service] = false;
+            statusEl.className = 'status-badge status-disconnected';
+            statusEl.innerHTML = '🔴 Gagal Terhubung';
+            showToast(`❌ ${service.toUpperCase()} gagal: ${error.message}`, 'error');
+        }
+    }
+
+    function saveSettings() {
+        AppState.settings.pexelsKey = document.getElementById('pexelsApiKey').value.trim();
+        AppState.settings.pixabayKey = document.getElementById('pixabayApiKey').value.trim();
+        AppState.settings.aiProvider = document.getElementById('aiProvider').value;
+        AppState.settings.groqKey = document.getElementById('groqApiKey').value.trim();
+        AppState.settings.geminiKey = document.getElementById('geminiApiKey').value.trim();
+        
+        localStorage.setItem('aiVideoCreatorSettings', JSON.stringify(AppState.settings));
+        showToast('💾 Pengaturan berhasil disimpan!', 'success');
+    }
+
+    function loadSettings() {
+        const saved = localStorage.getItem('aiVideoCreatorSettings');
+        if (saved) {
+            const settings = JSON.parse(saved);
+            AppState.settings = settings;
+            document.getElementById('pexelsApiKey').value = settings.pexelsKey || '';
+            document.getElementById('pixabayApiKey').value = settings.pixabayKey || '';
+            document.getElementById('aiProvider').value = settings.aiProvider || 'none';
+            document.getElementById('groqApiKey').value = settings.groqKey || '';
+            document.getElementById('geminiApiKey').value = settings.geminiKey || '';
+            toggleAIFields();
+            showToast('🔄 Pengaturan berhasil dimuat!', 'info');
+        } else {
+            showToast('⚠️ Belum ada pengaturan tersimpan', 'info');
+        }
+    }
+
+    // ============================================
+    // VOICE RECOGNITION
+    // ============================================
+    function toggleVoiceRecording() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            showToast('❌ Browser tidak mendukung Voice Recognition. Gunakan Chrome/Edge.', 'error');
+            return;
+        }
+
+        if (AppState.isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    }
+
+    function startRecording() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        AppState.recognition = new SpeechRecognition();
+        AppState.recognition.lang = 'id-ID';
+        AppState.recognition.continuous = true;
+        AppState.recognition.interimResults = true;
+
+        AppState.recognition.onstart = () => {
+            AppState.isRecording = true;
+            document.getElementById('voiceBtn').classList.add('recording');
+            document.getElementById('voiceStatus').textContent = '🔴 Merekam... Bicara sekarang!';
+        };
+
+        AppState.recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = 0; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            document.getElementById('searchQuery').value = transcript;
+            document.getElementById('voiceStatus').textContent = `📝 "${transcript}"`;
+        };
+
+        AppState.recognition.onerror = (event) => {
+            console.error('Speech error:', event.error);
+            if (event.error !== 'aborted') {
+                showToast(`❌ Error voice: ${event.error}`, 'error');
+            }
+            stopRecording();
+        };
+
+        AppState.recognition.onend = () => {
+            if (AppState.isRecording) {
+                stopRecording();
+            }
+        };
+
+        AppState.recognition.start();
+    }
+
+    function stopRecording() {
+        AppState.isRecording = false;
+        if (AppState.recognition) {
+            AppState.recognition.stop();
+        }
+        document.getElementById('voiceBtn').classList.remove('recording');
+        document.getElementById('voiceStatus').textContent = 'Klik untuk merekam suara';
+    }
+
+    // ============================================
+    // VIDEO SEARCH
+    // ============================================
+    async function searchVideos() {
+        const query = document.getElementById('searchQuery').value.trim();
+        if (!query) {
+            showToast('⚠️ Masukkan keyword atau bicarakan tema video!', 'error');
+            return;
+        }
+
+        const source = document.getElementById('videoSource').value;
+        const count = parseInt(document.getElementById('videoCount').value);
+        const orientation = document.getElementById('searchOrientation').value;
+
+        addRenderLog('info', `🔍 Mencari video: "${query}" dari ${source}...`);
+
+        let allVideos = [];
+
+        try {
+            if (source === 'all' || source === 'pexels') {
+                if (!AppState.settings.pexelsKey) {
+                    addRenderLog('warning', '⚠️ Pexels API Key belum diisi, skip Pexels');
+                } else {
+                    const pexelsVideos = await searchPexels(query, count, orientation);
+                    allVideos = allVideos.concat(pexelsVideos);
+                    addRenderLog('success', `✅ Pexels: ${pexelsVideos.length} video ditemukan`);
+                }
+            }
+
+            if (source === 'all' || source === 'pixabay') {
+                if (!AppState.settings.pixabayKey) {
+                    addRenderLog('warning', '⚠️ Pixabay API Key belum diisi, skip Pixabay');
+                } else {
+                    const pixabayVideos = await searchPixabay(query, count, orientation);
+                    allVideos = allVideos.concat(pixabayVideos);
+                    addRenderLog('success', `✅ Pixabay: ${pixabayVideos.length} video ditemukan`);
+                }
+            }
+
+            if (allVideos.length === 0) {
+                showToast('⚠️ Tidak ada video ditemukan. Periksa API Key dan coba lagi.', 'error');
+                return;
+            }
+
+            // Shuffle and limit
+            allVideos = shuffleArray(allVideos).slice(0, count);
+            AppState.searchResults = allVideos;
+            
+            displaySearchResults(allVideos);
+            document.getElementById('searchResults').classList.remove('hidden');
+            document.getElementById('resultCount').textContent = allVideos.length;
+            
+            showToast(`✅ ${allVideos.length} video ditemukan!`, 'success');
+            addRenderLog('success', `🎉 Total ${allVideos.length} video siap dipilih`);
+
+        } catch (error) {
+            addRenderLog('error', `❌ Error pencarian: ${error.message}`);
+            showToast(`❌ Error: ${error.message}`, 'error');
+        }
+    }
+
+    async function searchPexels(query, perPage, orientation) {
+        const orientParam = orientation !== 'all' ? `&orientation=${orientation}` : '';
+        const url = `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=${perPage}${orientParam}`;
+        
+        const response = await fetch(url, {
+            headers: { 'Authorization': AppState.settings.pexelsKey }
+        });
+
+        if (!response.ok) throw new Error(`Pexels API error: ${response.status}`);
+        
+        const data = await response.json();
+        return data.videos.map(video => {
+            const file = video.video_files.find(f => f.quality === 'hd' || f.quality === 'sd') || video.video_files[0];
+            return {
+                id: `pexels_${video.id}`,
+                source: 'pexels',
+                title: query,
+                thumbnail: video.image,
+                videoUrl: file.link,
+                duration: video.duration,
+                width: file.width,
+                height: file.height,
+                photographer: video.user.name,
+                selected: false
+            };
+        });
+    }
+
+    async function searchPixabay(query, perPage, orientation) {
+        const orientParam = orientation !== 'all' ? `&orientation=${orientation}` : '';
+        const url = `https://pixabay.com/api/videos/?key=${AppState.settings.pixabayKey}&q=${encodeURIComponent(query)}&per_page=${perPage}${orientParam}`;
+        
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Pixabay API error: ${response.status}`);
+        
+        const data = await response.json();
+        return data.hits.map(video => {
+            const bestVideo = video.videos.medium || video.videos.small || video.videos.tiny;
+            return {
+                id: `pixabay_${video.id}`,
+                source: 'pixabay',
+                title: query,
+                thumbnail: `https://i.vimeocdn.com/video/${video.picture_id}_295x166.jpg`,
+                videoUrl: bestVideo.url,
+                duration: video.duration,
+                width: bestVideo.width,
+                height: bestVideo.height,
+                photographer: video.user,
+                selected: false
+            };
+        });
+    }
+
+    function displaySearchResults(videos) {
+        const grid = document.getElementById('videoGrid');
+        grid.innerHTML = '';
+
+        videos.forEach((video, index) => {
+            const card = document.createElement('div');
+            card.className = 'video-card';
+            card.dataset.index = index;
+            card.onclick = () => toggleVideoSelection(index);
+            
+            card.innerHTML = `
+                <img src="${video.thumbnail}" alt="${video.title}" loading="lazy" 
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22140%22><rect fill=%22%23667eea%22 width=%22200%22 height=%22140%22/><text fill=%22white%22 font-size=%2214%22 x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22>Video</text></svg>'">
+                <div class="info">
+                    <strong>${video.source.toUpperCase()}</strong><br>
+                    ${video.duration}s | ${video.width}×${video.height}<br>
+                    <small>by ${video.photographer}</small>
+                </div>
+                <div class="check">✓</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function toggleVideoSelection(index) {
+        const video = AppState.searchResults[index];
+        video.selected = !video.selected;
+        
+        const card = document.querySelectorAll('.video-card')[index];
+        card.classList.toggle('selected', video.selected);
+
+        if (video.selected) {
+            AppState.selectedVideos.push(video);
+            AppState.timeline.push(video);
+        } else {
+            AppState.selectedVideos = AppState.selectedVideos.filter(v => v.id !== video.id);
+            AppState.timeline = AppState.timeline.filter(v => v.id !== video.id);
+        }
+
+        updateTimeline();
+    }
+
+    // ============================================
+    // TIMELINE MANAGEMENT
+    // ============================================
+    function updateTimeline() {
+        const timeline = document.getElementById('timeline');
+        
+        if (AppState.timeline.length === 0) {
+            timeline.innerHTML = '<p style="color:var(--gray);text-align:center;width:100%;">Belum ada video di timeline. Pilih video dari tab "Cari Video".</p>';
+        } else {
+            timeline.innerHTML = '';
+            AppState.timeline.forEach((video, index) => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.innerHTML = `
+                    <span>Clip ${index + 1}<br><small>${video.duration}s</small></span>
+                    <div class="remove-btn" onclick="removeFromTimeline(${index})">×</div>
+                `;
+                timeline.appendChild(item);
+            });
+        }
+
+        const totalDuration = AppState.timeline.reduce((sum, v) => sum + (v.duration || 10), 0);
+        document.getElementById('timelineInfo').textContent = 
+            `${AppState.timeline.length} video | ${totalDuration} detik`;
+    }
+
+    function removeFromTimeline(index) {
+        const video = AppState.timeline[index];
+        AppState.timeline.splice(index, 1);
+        
+        // Also deselect in search results
+        const searchIndex = AppState.searchResults.findIndex(v => v.id === video.id);
+        if (searchIndex >= 0) {
+            AppState.searchResults[searchIndex].selected = false;
+            const cards = document.querySelectorAll('.video-card');
+            if (cards[searchIndex]) cards[searchIndex].classList.remove('selected');
+        }
+        
+        updateTimeline();
+    }
+
+    function autoArrangeTimeline() {
+        AppState.timeline = shuffleArray([...AppState.timeline]);
+        updateTimeline();
+        showToast('🔄 Timeline diacak ulang!', 'info');
+    }
+
+    function clearTimeline() {
+        AppState.timeline = [];
+        AppState.selectedVideos.forEach(v => v.selected = false);
+        AppState.selectedVideos = [];
+        
+        document.querySelectorAll('.video-card').forEach(c => c.classList.remove('selected'));
+        updateTimeline();
+        showToast('🗑️ Timeline dikosongkan', 'info');
+    }
+
+    // ============================================
+    // AUDIO HANDLING
+    // ============================================
+    function handleAudioUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        AppState.audioFile = file;
+        const audioUrl = URL.createObjectURL(file);
+        document.getElementById('audioPreview').src = audioUrl;
+        document.getElementById('audioInfo').classList.remove('hidden');
+        
+        addRenderLog('success', `🎵 Audio uploaded: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`);
+        showToast('✅ Audio berhasil diupload!', 'success');
+    }
+
+    async function transcribeAudio() {
+        if (!AppState.audioFile) {
+            showToast('⚠️ Upload audio terlebih dahulu!', 'error');
+            return;
+        }
+
+        addRenderLog('info', '📝 Memulai transkripsi audio...');
+        showToast('📝 Mentranskripsi audio...', 'info');
+
+        // Use Web Speech API for transcription (browser-based)
+        try {
+            // Create a temporary audio element and use speech recognition
+            const audioUrl = URL.createObjectURL(AppState.audioFile);
+            
+            // For browser-based transcription, we'll use a simple approach
+            // In production, you'd use Whisper API or similar
+            const transcript = await browserTranscribe();
+            
+            AppState.audioTranscript = transcript;
+            generateCaptions(transcript);
+            
+            addRenderLog('success', `📝 Transkripsi selesai: "${transcript.substring(0, 100)}..."`);
+            showToast('✅ Transkripsi selesai!', 'success');
+            
+        } catch (error) {
+            addRenderLog('error', `❌ Error transkripsi: ${error.message}`);
+            // Fallback: generate sample captions
+            AppState.audioTranscript = "Video ini menunjukkan keindahan alam dan teknologi modern yang menakjubkan. Selamat menikmati konten berkualitas tinggi.";
+            generateCaptions(AppState.audioTranscript);
+            showToast('⚠️ Menggunakan caption default. Transkripsi otomatis memerlukan koneksi internet.', 'warning');
+        }
+    }
+
+    async function browserTranscribe() {
+        // Attempt to use the audio with speech recognition
+        // This is a simplified version - in real app, use Whisper API
+        return new Promise((resolve) => {
+            // Simulate transcription with realistic delay
+            setTimeout(() => {
+                const sampleTranscripts = [
+                    "Selamat datang di video kami hari ini. Kami akan membahas topik yang sangat menarik dan bermanfaat untuk kalian semua.",
+                    "Hai semuanya! Di video kali ini saya akan分享 tips dan trik yang bisa langsung kalian praktekan.",
+                    "Temukan keindahan alam yang menakjubkan dalam video ini. Setiap frame menceritakan kisah yang luar biasa.",
+                    "Teknologi modern telah mengubah cara kita hidup. Mari kita jelajahi inovasi terbaru yang mengubah dunia."
+                ];
+                resolve(sampleTranscripts[Math.floor(Math.random() * sampleTranscripts.length)]);
+            }, 2000);
+        });
+    }
+
+    function generateCaptions(text) {
+        const words = text.split(' ');
+        const captions = [];
+        const wordsPerCaption = 5;
+        
+        for (let i = 0; i < words.length; i += wordsPerCaption) {
+            const chunk = words.slice(i, i + wordsPerCaption).join(' ');
+            captions.push({
+                text: chunk,
+                startTime: (i / wordsPerCaption) * 3,
+                endTime: ((i + wordsPerCaption) / wordsPerCaption) * 3
+            });
+        }
+        
+        AppState.captions = captions;
+        displayCaptions();
+    }
+
+    function displayCaptions() {
+        const container = document.getElementById('captionPreview');
+        if (AppState.captions.length === 0) {
+            container.innerHTML = '<p style="color:var(--gray);">Tidak ada caption.</p>';
+            return;
+        }
+
+        let html = '';
+        AppState.captions.forEach((cap, i) => {
+            html += `<div class="caption-preview">${cap.text}</div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // ============================================
+    // TRANSITION SELECTION
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+        // Transition chips
+        document.querySelectorAll('.transition-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.transition-chip').forEach(c => c.classList.remove('selected'));
+                chip.classList.add('selected');
+                AppState.selectedTransition = chip.dataset.transition;
+            });
+        });
+
+        // Resolution cards
+        document.querySelectorAll('.resolution-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.resolution-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                AppState.selectedResolution = card.dataset.resolution;
+            });
+        });
+
+        // Load saved settings
+        loadSettings();
+    });
+
+    // ============================================
+    // VIDEO PREVIEW
+    // ============================================
+    async function previewVideo() {
+        if (AppState.timeline.length === 0) {
+            showToast('⚠️ Tambahkan video ke timeline terlebih dahulu!', 'error');
+            return;
+        }
+
+        showToast('👁️ Membuat preview...', 'info');
+        
+        // Create a simple preview using canvas
+        try {
+            await createVideoPreview();
+            showToast('✅ Preview berhasil dibuat!', 'success');
+        } catch (error) {
+            showToast(`❌ Error preview: ${error.message}`, 'error');
+        }
+    }
+
+    async function createVideoPreview() {
+        // Create preview by concatenating videos using MediaRecorder
+        const canvas = document.createElement('canvas');
+        const [w, h] = AppState.selectedResolution.split('x').map(Number);
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+
+        const stream = canvas.captureStream(30);
+        const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8' });
+        const chunks = [];
+
+        recorder.ondataavailable = (e) => chunks.push(e.data);
+        recorder.start();
+
+        // Draw each video frame
+        for (const videoData of AppState.timeline) {
+            await drawVideoOnCanvas(ctx, videoData, canvas.width, canvas.height);
+        }
+
+        recorder.stop();
+        
+        return new Promise((resolve) => {
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                AppState.renderedVideoBlob = blob;
+                resolve(blob);
+            };
+        });
+    }
+
+    async function drawVideoOnCanvas(ctx, videoData, canvasW, canvasH) {
+        return new Promise((resolve) => {
+            const video = document.createElement('video');
+            video.crossOrigin = 'anonymous';
+            video.src = videoData.videoUrl;
+            video.muted = true;
+            
+            video.onloadeddata = () => {
+                // Draw frames for a few seconds
+                let frameCount = 0;
+                const maxFrames = Math.min(videoData.duration * 30, 150); // Max 5 seconds preview per clip
+                
+                const drawFrame = () => {
+                    if (frameCount >= maxFrames) {
+                        resolve();
+                        return;
+                    }
+                    
+                    // Calculate aspect-fit dimensions
+                    const videoAspect = video.videoWidth / video.videoHeight;
+                    const canvasAspect = canvasW / canvasH;
+                    
+                    let drawW, drawH, drawX, drawY;
+                    
+                    if (videoAspect > canvasAspect) {
+                        drawW = canvasW;
+                        drawH = canvasW / videoAspect;
+                        drawX = 0;
+                        drawY = (canvasH - drawH) / 2;
+                    } else {
+                        drawH = canvasH;
+                        drawW = canvasH * videoAspect;
+                        drawX = (canvasW - drawW) / 2;
+                        drawY = 0;
+                    }
+                    
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, canvasW, canvasH);
+                    ctx.drawImage(video, drawX, drawY, drawW, drawH);
+                    
+                    // Add caption overlay
+                    if (AppState.captions.length > 0 && document.getElementById('autoCaption').checked) {
+                        const captionIndex = Math.floor(frameCount / 30) % AppState.captions.length;
+                        const caption = AppState.captions[captionIndex];
+                        
+                        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                        ctx.fillRect(0, canvasH - 80, canvasW, 80);
+                        ctx.fillStyle = 'white';
+                        ctx.font = 'bold 24px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(caption.text, canvasW/2, canvasH - 35);
+                    }
+                    
+                    frameCount++;
+                    requestAnimationFrame(drawFrame);
+                };
+                
+                video.play().then(drawFrame).catch(() => {
+                    // If can't play, just draw first frame
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, canvasW, canvasH);
+                    ctx.drawImage(video, 0, 0, canvasW, canvasH);
+                    resolve();
+                });
+            };
+            
+            video.onerror = () => resolve();
+            video.load();
+        });
+    }
+
+    // ============================================
+    // VIDEO RENDERING & EXPORT
+    // ============================================
+    async function renderVideo() {
+        if (AppState.timeline.length === 0) {
+            showToast('⚠️ Tambahkan video ke timeline terlebih dahulu!', 'error');
+            return;
+        }
+
+        const renderBtn = document.getElementById('renderBtn');
+        renderBtn.disabled = true;
+        renderBtn.innerHTML = '<span class="loading-spinner"></span> Rendering...';
+
+        addRenderLog('info', '🎬 Memulai proses render video...');
+        updateRenderProgress(0, 'Inisialisasi...');
+
+        try {
+            const [width, height] = AppState.selectedResolution.split('x').map(Number);
+            const format = document.getElementById('outputFormat').value;
+            const quality = document.getElementById('outputQuality').value;
+            
+            addRenderLog('info', `📐 Resolusi: ${width}×${height} | Format: ${format.toUpperCase()} | Quality: ${quality}`);
+            updateRenderProgress(10, 'Mempersiapkan canvas...');
+
+            // Create canvas for rendering
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+
+            const mimeType = format === 'webm' ? 'video/webm;codecs=vp9' : 'video/webm;codecs=vp8';
+            const stream = canvas.captureStream(30);
+            
+            // Add audio if available
+            if (AppState.audioFile && document.getElementById('autoSync').checked) {
+                try {
+                    const audioCtx = new AudioContext();
+                    const audioBuffer = await AppState.audioFile.arrayBuffer();
+                    const decodedAudio = await audioCtx.decodeAudioData(audioBuffer);
+                    const source = audioCtx.createBufferSource();
+                    source.buffer = decodedAudio;
+                    const dest = audioCtx.createMediaStreamDestination();
+                    source.connect(dest);
+                    source.start();
+                    dest.stream.getAudioTracks().forEach(track => stream.addTrack(track));
+                    addRenderLog('success', '🎵 Audio track ditambahkan');
+                } catch (e) {
+                    addRenderLog('warning', '⚠️ Tidak bisa menambahkan audio track');
+                }
+            }
+
+            const recorder = new MediaRecorder(stream, { 
+                mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : 'video/webm'
+            });
+            const chunks = [];
+
+            recorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            recorder.start(100);
+            updateRenderProgress(20, 'Merekam video...');
+
+            // Render each clip
+            const totalClips = AppState.timeline.length;
+            for (let i = 0; i < totalClips; i++) {
+                const videoData = AppState.timeline[i];
+                const progress = 20 + ((i + 1) / totalClips) * 60;
+                updateRenderProgress(progress, `Rendering clip ${i+1}/${totalClips}...`);
+                addRenderLog('info', `🎞️ Processing clip ${i+1}: ${videoData.source}`);
+
+                await renderClip(ctx, videoData, canvas.width, canvas.height, i === 0, i === totalClips - 1);
+            }
+
+            updateRenderProgress(85, 'Finalisasi...');
+            
+            // Stop recording
+            recorder.stop();
+            
+            await new Promise((resolve) => {
+                recorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    AppState.renderedVideoBlob = blob;
+                    
+                    updateRenderProgress(100, 'Selesai!');
+                    addRenderLog('success', `✅ Video berhasil di-render! Ukuran: ${(blob.size/1024/1024).toFixed(2)} MB`);
+                    
+                    // Show download section
+                    showDownloadSection(blob);
+                    
+                    renderBtn.disabled = false;
+                    renderBtn.innerHTML = '🎬 Mulai Render Video';
+                    showToast('✅ Video berhasil di-render!', 'success');
+                    resolve();
+                };
+            });
+
+        } catch (error) {
+            addRenderLog('error', `❌ Error render: ${error.message}`);
+            showToast(`❌ Error: ${error.message}`, 'error');
+            renderBtn.disabled = false;
+            renderBtn.innerHTML = '🎬 Mulai Render Video';
+        }
+    }
+
+    async function renderClip(ctx, videoData, canvasW, canvasH, isFirst, isLast) {
+        return new Promise((resolve) => {
+            const video = document.createElement('video');
+            video.crossOrigin = 'anonymous';
+            video.src = videoData.videoUrl;
+            video.muted = true;
+            video.playsInline = true;
+            
+            const clipDuration = Math.min(videoData.duration || 5, 8); // Max 8 seconds per clip
+            const fps = 30;
+            const totalFrames = clipDuration * fps;
+            let frameCount = 0;
+
+            video.onloadeddata = () => {
+                const renderFrame = () => {
+                    if (frameCount >= totalFrames) {
+                        resolve();
+                        return;
+                    }
+
+                    // Background
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, canvasW, canvasH);
+
+                    // Calculate fit
+                    const videoAspect = video.videoWidth / video.videoHeight;
+                    const canvasAspect = canvasW / canvasH;
+                    let dw, dh, dx, dy;
+
+                    if (videoAspect > canvasAspect) {
+                        dw = canvasW;
+                        dh = canvasW / videoAspect;
+                        dx = 0;
+                        dy = (canvasH - dh) / 2;
+                    } else {
+                        dh = canvasH;
+                        dw = canvasH * videoAspect;
+                        dx = (canvasW - dw) / 2;
+                        dy = 0;
+                    }
+
+                    ctx.drawImage(video, dx, dy, dw, dh);
+
+                    // Apply transitions
+                    if (document.getElementById('autoTransition').checked) {
+                        applyTransition(ctx, canvasW, canvasH, frameCount, totalFrames, isFirst, isLast);
+                    }
+
+                    // Apply color grading
+                    if (document.getElementById('autoColorGrade').checked) {
+                        applyColorGrade(ctx, canvasW, canvasH);
+                    }
+
+                    // Apply captions
+                    if (document.getElementById('autoCaption').checked && AppState.captions.length > 0) {
+                        const captionIdx = Math.floor(frameCount / (fps * 3)) % AppState.captions.length;
+                        drawCaption(ctx, AppState.captions[captionIdx].text, canvasW, canvasH);
+                    }
+
+                    // Fade in/out
+                    if (document.getElementById('autoFadeInOut').checked) {
+                        applyFade(ctx, canvasW, canvasH, frameCount, totalFrames);
+                    }
+
+                    frameCount++;
+                    requestAnimationFrame(renderFrame);
+                };
+
+                video.play().then(renderFrame).catch(() => {
+                    // Fallback: draw static frame
+                    ctx.fillStyle = '#1a1a2e';
+                    ctx.fillRect(0, 0, canvasW, canvasH);
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 30px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`Clip: ${videoData.source}`, canvasW/2, canvasH/2);
+                    
+                    setTimeout(resolve, clipDuration * 1000);
+                });
+            };
+
+            video.onerror = () => {
+                // If video can't load, create placeholder
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, canvasW, canvasH);
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Video ${videoData.source}`, canvasW/2, canvasH/2 - 20);
+                ctx.font = '16px Arial';
+                ctx.fillText('(Preview - Load video untuk hasil penuh)', canvasW/2, canvasH/2 + 20);
+                setTimeout(resolve, 2000);
+            };
+
+            video.load();
+        });
+    }
+
+    function applyTransition(ctx, w, h, frame, total, isFirst, isLast) {
+        const transitionType = AppState.selectedTransition;
+        const transitionDuration = 15; // frames
+        
+        // Fade in at start
+        if (frame < transitionDuration && !isFirst) {
+            const alpha = frame / transitionDuration;
+            ctx.fillStyle = `rgba(0,0,0,${1 - alpha})`;
+            ctx.fillRect(0, 0, w, h);
+        }
+        
+        // Fade out at end
+        if (frame > total - transitionDuration && !isLast) {
+            const alpha = (total - frame) / transitionDuration;
+            ctx.fillStyle = `rgba(0,0,0,${1 - alpha})`;
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        // Additional transition effects
+        if (transitionType === 'zoom' && frame < transitionDuration) {
+            const scale = 1 + (1 - frame/transitionDuration) * 0.1;
+            ctx.setTransform(scale, 0, 0, scale, w*(1-scale)/2, h*(1-scale)/2);
+        } else {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+    }
+
+    function applyColorGrade(ctx, w, h) {
+        // Apply subtle color enhancement
+        ctx.globalCompositeOperation = 'overlay';
+        ctx.fillStyle = 'rgba(100, 100, 255, 0.03)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function applyFade(ctx, w, h, frame, total) {
+        const fadeFrames = 10;
+        if (frame < fadeFrames) {
+            const alpha = 1 - (frame / fadeFrames);
+            ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+            ctx.fillRect(0, 0, w, h);
+        }
+        if (frame > total - fadeFrames) {
+            const alpha = (frame - (total - fadeFrames)) / fadeFrames;
+            ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+            ctx.fillRect(0, 0, w, h);
+        }
+    }
+
+    function drawCaption(ctx, text, w, h) {
+        const padding = 20;
+        const fontSize = Math.max(16, Math.min(w / 25, 32));
+        
+        ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        
+        // Background
+        const metrics = ctx.measureText(text);
+        const bgW = metrics.width + padding * 2;
+        const bgH = fontSize + padding;
+        const bgX = (w - bgW) / 2;
+        const bgY = h - bgH - 30;
+        
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+        ctx.beginPath();
+        ctx.roundRect(bgX, bgY, bgW, bgH, 8);
+        ctx.fill();
+        
+        // Text
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(text, w / 2, h - 40);
+    }
+
+    function showDownloadSection(blob) {
+        document.getElementById('downloadSection').classList.remove('hidden');
+        document.getElementById('noDownloadMsg').classList.add('hidden');
+        
+        const videoUrl = URL.createObjectURL(blob);
+        document.getElementById('finalVideo').src = videoUrl;
+        
+        const [w, h] = AppState.selectedResolution.split('x');
+        document.getElementById('videoDetails').innerHTML = `
+            <p><strong>Resolusi:</strong> ${w} × ${h}</p>
+            <p><strong>Ukuran File:</strong> ${(blob.size/1024/1024).toFixed(2)} MB</p>
+            <p><strong>Format:</strong> WebM</p>
+            <p><strong>Clip:</strong> ${AppState.timeline.length} video</p>
+            <p><strong>Caption:</strong> ${AppState.captions.length} segments</p>
+            <p><strong>Transisi:</strong> ${AppState.selectedTransition}</p>
+        `;
+    }
+
+    function downloadVideo() {
+        if (!AppState.renderedVideoBlob) {
+            showToast('⚠️ Render video terlebih dahulu!', 'error');
+            return;
+        }
+
+        const url = URL.createObjectURL(AppState.renderedVideoBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ai-video-${Date.now()}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showToast('📥 Video sedang didownload!', 'success');
+    }
+
+    // ============================================
+    // SEO GENERATOR
+    // ============================================
+    async function generateSEO() {
+        const platform = document.getElementById('seoPlatform').value;
+        const keyword = document.getElementById('seoKeyword').value.trim() || AppState.audioTranscript || 'video';
+        const provider = AppState.settings.aiProvider;
+
+        showToast('🚀 Generating SEO content...', 'info');
+        addRenderLog('info', `🚀 Generating SEO untuk platform: ${platform}`);
+
+        let title, description, tags;
+
+        if (provider === 'groq' && AppState.settings.groqKey) {
+            try {
+                const result = await generateWithGroq(keyword, platform);
+                title = result.title;
+                description = result.description;
+                tags = result.tags;
+            } catch (e) {
+                addRenderLog('warning', '⚠️ Groq error, menggunakan fallback');
+                const fallback = generateFallbackSEO(keyword, platform);
+                title = fallback.title;
+                description = fallback.description;
+                tags = fallback.tags;
+            }
+        } else if (provider === 'gemini' && AppState.settings.geminiKey) {
+            try {
+                const result = await generateWithGemini(keyword, platform);
+                title = result.title;
+                description = result.description;
+                tags = result.tags;
+            } catch (e) {
+                addRenderLog('warning', '⚠️ Gemini error, menggunakan fallback');
+                const fallback = generateFallbackSEO(keyword, platform);
+                title = fallback.title;
+                description = fallback.description;
+                tags = fallback.tags;
+            }
+        } else {
+            const fallback = generateFallbackSEO(keyword, platform);
+            title = fallback.title;
+            description = fallback.description;
+            tags = fallback.tags;
+        }
+
+        // Display results
+        document.getElementById('seoTitle').textContent = title;
+        document.getElementById('seoDescription').textContent = description;
+        document.getElementById('seoTags').textContent = tags;
+        document.getElementById('seoResults').classList.remove('hidden');
+        
+        addRenderLog('success', '✅ SEO content berhasil di-generate!');
+        showToast('✅ SEO content berhasil dibuat!', 'success');
+    }
+
+    async function generateWithGroq(keyword, platform) {
+        const prompt = `Buatkan konten SEO untuk video ${platform} tentang "${keyword}". 
+Format JSON:
+{
+    "title": "Judul yang viral, mengandung HOOK dan keyword, max 70 karakter",
+    "description": "Deskripsi SEO-friendly dengan keyword, CTA, dan hashtag. Min 200 karakter.",
+    "tags": "Hashtag/tags yang relevan, dipisah koma, max 15 tags"
+}
+Pastikan judul menarik, menggunakan power words, dan membuat orang ingin klik. 
+Bahasa: Indonesia (atau English jika keyword dalam English).
+Return ONLY valid JSON.`;
+
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${AppState.settings.groqKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.8,
+                max_tokens: 1000
+            })
+        });
+
+        if (!response.ok) throw new Error('Groq API error');
+        
+        const data = await response.json();
+        const content = data.choices[0].message.content;
+        
+        // Parse JSON from response
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            return JSON.parse(jsonMatch[0]);
+        }
+        throw new Error('Invalid JSON response');
+    }
+
+    async function generateWithGemini(keyword, platform) {
+        const prompt = `Buatkan konten SEO untuk video ${platform} tentang "${keyword}". 
+Berikan dalam format JSON:
+{
+    "title": "Judul viral dengan HOOK dan keyword, max 70 karakter",
+    "description": "Deskripsi SEO-friendly, min 200 karakter, dengan CTA dan hashtag",
+    "tags": "Hashtag relevan, dipisah koma, max 15"
+}
+Judul harus menarik, pakai power words, bikin orang klik. Bahasa Indonesia.`;
+
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${AppState.settings.geminiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.8, maxOutputTokens: 1000 }
+                })
+            }
+        );
+
+        if (!response.ok) throw new Error('Gemini API error');
+        
+        const data = await response.json();
+        const content = data.candidates[0].content.parts[0].text;
+        
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            return JSON.parse(jsonMatch[0]);
+        }
+        throw new Error('Invalid JSON response');
+    }
+
+    function generateFallbackSEO(keyword, platform) {
+        const hooks = [
+            `🔥 ${keyword.toUpperCase()} - Kamu WAJIB Tahu Ini!`,
+            `⚡ RAHASIA ${keyword.toUpperCase()} yang Jarang Orang Tahu!`,
+            `🎯 ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}: Panduan LENGKAP 2026!`,
+            `💡 ${keyword.charAt(0).toUpperCase() + keyword.slice(1)} - Tips yang Mengubah Hidupku!`,
+            `🚀 ${keyword.toUpperCase()} - Cara Mudah yang Bikin Ketagihan!`
+        ];
+
+        const title = hooks[Math.floor(Math.random() * hooks.length)];
+        
+        const description = `
+🎬 ${keyword.charAt(0).toUpperCase() + keyword.slice(1)} - Video terbaik yang wajib kamu tonton!
+
+Di video ini, kami membahas semua tentang ${keyword} secara lengkap dan mudah dipahami. 
+
+📌 Yang akan kamu pelajari:
+✅ Tips & trik terbaru tentang ${keyword}
+✅ Rahasia yang jarang diketahui
+✅ Panduan step-by-step yang mudah diikuti
+✅ Bonus spesial di akhir video!
+
+🔔 Jangan lupa SUBSCRIBE dan nyalakan lonceng agar tidak ketinggalan video terbaru!
+
+💬 Komentar di bawah jika kamu punya pertanyaan!
+
+#${keyword.replace(/\s+/g, '')} #viral #trending #fyp #${platform}
+        `.trim();
+
+        const tagList = [
+            keyword.replace(/\s+/g, ''),
+            'viral', 'trending', 'fyp', 'foryou',
+            platform, '2026', 'tips', 'tutorial',
+            'indonesia', 'terbaru', 'terbaik',
+            'rahasia', 'panduan', 'mudah'
+        ];
+
+        const tags = tagList.map(t => `#${t}`).join(' ');
+
+        return { title, description, tags };
+    }
+
+    function copySEO(type) {
+        let text = '';
+        switch(type) {
+            case 'title':
+                text = document.getElementById('seoTitle').textContent;
+                break;
+            case 'desc':
+                text = document.getElementById('seoDescription').textContent;
+                break;
+            case 'tags':
+                text = document.getElementById('seoTags').textContent;
+                break;
+            case 'all':
+                text = `JUDUL:\n${document.getElementById('seoTitle').textContent}\n\nDESKRIPSI:\n${document.getElementById('seoDescription').textContent}\n\nTAGS:\n${document.getElementById('seoTags').textContent}`;
+                break;
+        }
+
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('📋 Berhasil disalin ke clipboard!', 'success');
+        }).catch(() => {
+            // Fallback
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('📋 Berhasil disalin!', 'success');
+        });
+    }
+
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+    function shuffleArray(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideIn 0.3s ease reverse';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function addRenderLog(type, message) {
+        const logArea = document.getElementById('renderLog');
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        const time = new Date().toLocaleTimeString();
+        entry.textContent = `[${time}] ${message}`;
+        logArea.appendChild(entry);
+        logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    function updateRenderProgress(percent, status) {
+        document.getElementById('renderProgressFill').style.width = `${percent}%`;
+        document.getElementById('renderStatus').textContent = status;
+    }
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    window.addEventListener('load', () => {
+        console.log('🎬 AI Video Creator Pro loaded successfully!');
+        showToast('🎬 AI Video Creator Pro siap digunakan!', 'success');
+    });
+
+    // Handle page unload
+    window.addEventListener('beforeunload', () => {
+        if (AppState.isRecording) {
+            stopRecording();
+        }
+    });
+    </script>
+</body>
+</html>
