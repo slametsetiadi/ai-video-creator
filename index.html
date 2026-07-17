@@ -3,1277 +3,939 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AI Video Creator Pro - Auto Edit Video dari Audio</title>
+<title>🎬 AI Video Creator Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  :root{
-    --bg:#0b1020; --panel:#121a33; --panel2:#1a2347;
-    --accent:#6366f1; --accent2:#8b5cf6; --ok:#10b981; --err:#ef4444; --warn:#f59e0b;
-    --text:#e5e7eb; --muted:#94a3b8;
-  }
-  *{box-sizing:border-box}
-  html,body{background:linear-gradient(135deg,#0b1020 0%,#1a1147 100%);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh}
-  .glass{background:rgba(18,26,51,.75);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08)}
-  .btn{transition:all .2s ease}
-  .btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(99,102,241,.35)}
-  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
-  .gradient-text{background:linear-gradient(90deg,#818cf8,#c084fc,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .video-card{transition:all .3s;cursor:pointer;border:2px solid transparent}
-  .video-card:hover{transform:translateY(-4px);border-color:var(--accent)}
-  .video-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.3)}
-  .loader{border:3px solid rgba(255,255,255,.1);border-top-color:var(--accent);border-radius:50%;width:24px;height:24px;animation:spin 1s linear infinite;display:inline-block}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .toast{animation:slideIn .3s ease}
-  @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-  .step-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;background:#1e293b;color:#64748b;transition:all .3s}
-  .step-dot.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;box-shadow:0 0 20px rgba(99,102,241,.5)}
-  .step-dot.done{background:var(--ok);color:white}
-  .step-line{flex:1;height:2px;background:#1e293b;margin:0 8px}
-  .step-line.done{background:var(--ok)}
-  canvas#previewCanvas{background:#000;border-radius:12px;max-width:100%;height:auto}
-  input,select,textarea{background:#0f172a;border:1px solid rgba(255,255,255,.1);color:var(--text);padding:.6rem .8rem;border-radius:8px;width:100%;outline:none;transition:all .2s}
-  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.2)}
-  .caption-preview{position:absolute;left:50%;transform:translateX(-50%);padding:8px 16px;border-radius:8px;font-weight:700;text-align:center;max-width:90%;word-wrap:break-word;text-shadow:2px 2px 4px rgba(0,0,0,.8)}
-  ::-webkit-scrollbar{width:8px;height:8px}
-  ::-webkit-scrollbar-track{background:#0f172a}
-  ::-webkit-scrollbar-thumb{background:#334155;border-radius:4px}
-  ::-webkit-scrollbar-thumb:hover{background:#475569}
+  body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg,#0f172a,#1e293b); min-height:100vh; color:#e2e8f0; }
+  .glass { background: rgba(30,41,59,0.7); backdrop-filter: blur(12px); border:1px solid rgba(148,163,184,0.15); }
+  .btn-primary { background: linear-gradient(135deg,#6366f1,#8b5cf6); transition: all .2s; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(99,102,241,0.4); }
+  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+  .step-active { background: linear-gradient(135deg,#6366f1,#8b5cf6); color:white; }
+  .step-done { background: #10b981; color:white; }
+  .step-pending { background: #334155; color:#94a3b8; }
+  .spinner { border:3px solid rgba(255,255,255,0.2); border-top-color:#8b5cf6; border-radius:50%; width:20px; height:20px; animation:spin 1s linear infinite; display:inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .video-card { transition: all .2s; cursor:pointer; }
+  .video-card:hover { transform: scale(1.03); }
+  .video-card.selected { ring: 4px solid #8b5cf6; outline: 4px solid #8b5cf6; }
+  textarea, input, select { background:#0f172a !important; border:1px solid #334155; color:#e2e8f0; }
+  textarea:focus, input:focus, select:focus { outline:none; border-color:#8b5cf6; }
+  .caption-preview { position:absolute; bottom:10%; left:50%; transform:translateX(-50%); text-align:center; width:90%; }
+  .fade-in { animation: fadeIn .4s ease; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  progress { width:100%; height:10px; border-radius:10px; overflow:hidden; }
+  progress::-webkit-progress-bar { background:#334155; }
+  progress::-webkit-progress-value { background: linear-gradient(90deg,#6366f1,#8b5cf6); }
+  .tag { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; background:#1e293b; border:1px solid #334155; margin:2px; }
 </style>
 </head>
 <body>
-<div class="container mx-auto px-4 py-6 max-w-7xl">
+
+<div class="max-w-6xl mx-auto p-4 md:p-8">
 
   <!-- HEADER -->
-  <header class="glass rounded-2xl p-6 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-    <div>
-      <h1 class="text-3xl md:text-4xl font-bold gradient-text">🎬 AI Video Creator Pro</h1>
-      <p class="text-slate-400 text-sm mt-1">Auto cari video • Auto edit • Auto caption • Auto SEO — dari audio Anda</p>
-    </div>
-    <div class="flex gap-2">
-      <button id="btnSettings" class="btn bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-medium">⚙️ Settings</button>
-      <button id="btnReset" class="btn bg-red-600/80 hover:bg-red-600 px-4 py-2 rounded-lg font-medium">🔄 Reset</button>
-    </div>
+  <header class="text-center mb-8 fade-in">
+    <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+      🎬 AI Video Creator Pro
+    </h1>
+    <p class="text-slate-400 mt-2">Ubah Audio → Video Viral Otomatis dengan AI • Bebas Copyright • Siap Publish</p>
   </header>
 
   <!-- STEPPER -->
-  <div class="glass rounded-2xl p-6 mb-6 flex items-center justify-center">
-    <div class="step-dot active" data-step="1">1</div>
-    <div class="step-line"></div>
-    <div class="step-dot" data-step="2">2</div>
-    <div class="step-line"></div>
-    <div class="step-dot" data-step="3">3</div>
-    <div class="step-line"></div>
-    <div class="step-dot" data-step="4">4</div>
-    <div class="step-line"></div>
-    <div class="step-dot" data-step="5">5</div>
+  <div class="flex flex-wrap justify-center gap-2 mb-8">
+    <div id="step-ind-1" class="step-active px-4 py-2 rounded-full text-sm font-semibold">1. API Key</div>
+    <div id="step-ind-2" class="step-pending px-4 py-2 rounded-full text-sm font-semibold">2. Upload Audio</div>
+    <div id="step-ind-3" class="step-pending px-4 py-2 rounded-full text-sm font-semibold">3. Transkrip & Tema</div>
+    <div id="step-ind-4" class="step-pending px-4 py-2 rounded-full text-sm font-semibold">4. Cari Video</div>
+    <div id="step-ind-5" class="step-pending px-4 py-2 rounded-full text-sm font-semibold">5. Konfigurasi</div>
+    <div id="step-ind-6" class="step-pending px-4 py-2 rounded-full text-sm font-semibold">6. Render</div>
+    <div id="step-ind-7" class="step-pending px-4 py-2 rounded-full text-sm font-semibold">7. SEO & Judul</div>
+    <div id="step-ind-8" class="step-pending px-4 py-2 rounded-full text-sm font-semibold">8. Download</div>
   </div>
 
-  <!-- STEP 1: UPLOAD AUDIO -->
-  <section id="step1" class="glass rounded-2xl p-6 mb-6">
-    <h2 class="text-2xl font-bold mb-4">🎤 Step 1: Upload Audio / Voice</h2>
-    <p class="text-slate-400 mb-4">Upload file audio (MP3, WAV, M4A, OGG) atau rekam langsung. Audio akan ditranskrip otomatis menggunakan AI Whisper.</p>
-    <div class="grid md:grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm font-medium mb-2">📁 Pilih File Audio</label>
-        <input type="file" id="audioFile" accept="audio/*" class="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 file:cursor-pointer" />
-        <audio id="audioPlayer" controls class="mt-4 w-full hidden"></audio>
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-2">🎙️ Atau Rekam Langsung</label>
-        <div class="flex gap-2">
-          <button id="btnRecord" class="btn bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg font-medium flex-1">🔴 Mulai Rekam</button>
-          <button id="btnStopRecord" class="btn bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg font-medium flex-1" disabled>⏹️ Stop</button>
-        </div>
-        <div id="recordStatus" class="text-sm text-slate-400 mt-2"></div>
-      </div>
-    </div>
-    <div class="mt-4 flex flex-wrap gap-2">
-      <button id="btnTranscribe" class="btn bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 px-6 py-3 rounded-lg font-semibold" disabled>🧠 Transkrip Audio dengan AI</button>
-      <div id="transcribeStatus" class="flex items-center gap-2 text-sm"></div>
-    </div>
-    <div id="transcriptBox" class="mt-4 hidden">
-      <label class="block text-sm font-medium mb-2">📝 Hasil Transkrip (bisa diedit)</label>
-      <textarea id="transcriptText" rows="5" placeholder="Transkrip akan muncul di sini..."></textarea>
-      <div id="transcriptMeta" class="text-xs text-slate-400 mt-2"></div>
-    </div>
-  </section>
+  <!-- ============ STEP 1: API KEYS ============ -->
+  <section id="step-1" class="glass rounded-2xl p-6 md:p-8 fade-in">
+    <h2 class="text-2xl font-bold mb-4">🔑 Step 1: Konfigurasi API Key</h2>
+    <p class="text-slate-400 mb-6 text-sm">
+      Masukkan API key. Semua key disimpan lokal di browser (localStorage). 
+      Dapatkan gratis di: 
+      <a class="text-indigo-400 underline" href="https://console.groq.com/keys" target="_blank">Groq</a> •
+      <a class="text-indigo-400 underline" href="https://aistudio.google.com/apikey" target="_blank">Gemini</a> •
+      <a class="text-indigo-400 underline" href="https://www.pexels.com/api/" target="_blank">Pexels</a>
+    </p>
 
-  <!-- STEP 2: SEARCH VIDEO -->
-  <section id="step2" class="glass rounded-2xl p-6 mb-6 hidden">
-    <h2 class="text-2xl font-bold mb-4">🔍 Step 2: Cari Video Bebas Copyright</h2>
-    <p class="text-slate-400 mb-4">AI akan menganalisis transkrip dan mencari video stock dari Pexels (bebas copyright, gratis) yang sesuai tema.</p>
-    <div class="flex flex-wrap gap-2 mb-4">
-      <input type="text" id="searchKeyword" placeholder="Keyword pencarian (otomatis dari transkrip)" class="flex-1 min-w-[200px]" />
-      <select id="searchOrientation" class="w-auto">
-        <option value="all">Semua Orientasi</option>
-        <option value="landscape">Landscape (16:9)</option>
-        <option value="portrait">Portrait (9:16)</option>
-        <option value="square">Square (1:1)</option>
+    <div class="grid md:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-semibold mb-1">Groq API Key (Whisper + LLM)</label>
+        <input id="groqKey" type="password" placeholder="gsk_..." class="w-full p-3 rounded-lg" />
+        <button onclick="testAPI('groq')" class="mt-2 w-full bg-slate-700 hover:bg-slate-600 p-2 rounded-lg text-sm">🔍 Test Groq</button>
+        <div id="groqStatus" class="text-xs mt-1"></div>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Gemini API Key (Opsional)</label>
+        <input id="geminiKey" type="password" placeholder="AIza..." class="w-full p-3 rounded-lg" />
+        <button onclick="testAPI('gemini')" class="mt-2 w-full bg-slate-700 hover:bg-slate-600 p-2 rounded-lg text-sm">🔍 Test Gemini</button>
+        <div id="geminiStatus" class="text-xs mt-1"></div>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Pexels API Key (Wajib)</label>
+        <input id="pexelsKey" type="password" placeholder="..." class="w-full p-3 rounded-lg" />
+        <button onclick="testAPI('pexels')" class="mt-2 w-full bg-slate-700 hover:bg-slate-600 p-2 rounded-lg text-sm">🔍 Test Pexels</button>
+        <div id="pexelsStatus" class="text-xs mt-1"></div>
+      </div>
+    </div>
+
+    <div class="mt-6 flex items-center gap-3">
+      <label class="text-sm">LLM Utama:</label>
+      <select id="llmProvider" class="p-2 rounded-lg">
+        <option value="groq">Groq (llama-3.3-70b)</option>
+        <option value="gemini">Gemini (gemini-2.0-flash)</option>
       </select>
-      <button id="btnSearch" class="btn bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 px-6 py-2 rounded-lg font-semibold">🔎 Cari Video</button>
     </div>
-    <div id="searchStatus" class="text-sm text-slate-400 mb-4"></div>
-    <div id="videoGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
-    <div class="mt-4 flex justify-between items-center">
-      <div id="selectionInfo" class="text-sm text-slate-400">Pilih minimal 1 video untuk lanjut</div>
-      <button id="btnToStep3" class="btn bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 px-6 py-3 rounded-lg font-semibold" disabled>Lanjut ke Edit →</button>
+
+    <div class="flex justify-end mt-8">
+      <button onclick="goStep(2)" class="btn-primary px-8 py-3 rounded-xl font-bold">Lanjut →</button>
     </div>
   </section>
 
-  <!-- STEP 3: EDIT VIDEO -->
-  <section id="step3" class="glass rounded-2xl p-6 mb-6 hidden">
-    <h2 class="text-2xl font-bold mb-4">🎨 Step 3: Auto Edit Video</h2>
-    <p class="text-slate-400 mb-4">Atur opsi edit otomatis: caption, transisi, resolusi, dan efek.</p>
+  <!-- ============ STEP 2: UPLOAD AUDIO ============ -->
+  <section id="step-2" class="glass rounded-2xl p-6 md:p-8 fade-in hidden">
+    <h2 class="text-2xl font-bold mb-4">🎤 Step 2: Upload Audio / Voice</h2>
+    <p class="text-slate-400 mb-6 text-sm">Upload file audio (MP3, WAV, M4A, OGG) atau rekam langsung. Maksimal 25MB.</p>
+
+    <div class="border-2 border-dashed border-slate-600 rounded-xl p-10 text-center hover:border-indigo-500 transition">
+      <input id="audioFile" type="file" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)" />
+      <label for="audioFile" class="cursor-pointer">
+        <div class="text-5xl mb-3">🎵</div>
+        <div class="font-semibold">Klik untuk pilih file audio</div>
+        <div class="text-sm text-slate-400 mt-1">atau drag & drop di sini</div>
+      </label>
+    </div>
+
+    <div id="audioPreview" class="mt-6 hidden">
+      <audio id="audioPlayer" controls class="w-full"></audio>
+      <div id="audioInfo" class="text-sm text-slate-400 mt-2"></div>
+    </div>
+
+    <div class="flex justify-between mt-8">
+      <button onclick="goStep(1)" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl font-bold">← Kembali</button>
+      <button id="btnStep2Next" onclick="goStep(3)" disabled class="btn-primary px-8 py-3 rounded-xl font-bold">Lanjut →</button>
+    </div>
+  </section>
+
+  <!-- ============ STEP 3: TRANSCRIBE & ANALYZE ============ -->
+  <section id="step-3" class="glass rounded-2xl p-6 md:p-8 fade-in hidden">
+    <h2 class="text-2xl font-bold mb-4">🧠 Step 3: Transkripsi & Analisis Tema AI</h2>
+    <p class="text-slate-400 mb-6 text-sm">AI akan mentranskrip audio dan menganalisis tema untuk pencarian video yang relevan.</p>
+
+    <button id="btnTranscribe" onclick="runTranscribeAndAnalyze()" class="btn-primary px-6 py-3 rounded-xl font-bold mb-6">
+      ▶️ Mulai Transkripsi & Analisis
+    </button>
+
+    <div id="transcribeProgress" class="hidden mb-4">
+      <div class="text-sm mb-2" id="transcribeStatusText">Mentranskrip audio...</div>
+      <progress id="transcribeProgressBar" value="0" max="100"></progress>
+    </div>
+
+    <div id="transcribeResult" class="hidden">
+      <div class="mb-4">
+        <label class="block text-sm font-semibold mb-2">📝 Transkrip (bisa diedit):</label>
+        <textarea id="transcriptText" rows="6" class="w-full p-3 rounded-lg"></textarea>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-semibold mb-2">🎯 Tema / Keyword Pencarian:</label>
+        <div id="themeTags" class="mb-2"></div>
+        <input id="themeInput" class="w-full p-3 rounded-lg" placeholder="nature, ocean, sunset, ..." />
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-semibold mb-2">🌐 Bahasa:</label>
+        <select id="audioLang" class="p-2 rounded-lg">
+          <option value="id">Indonesia</option>
+          <option value="en">English</option>
+          <option value="jw">Javanese</option>
+          <option value="su">Sundanese</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex justify-between mt-8">
+      <button onclick="goStep(2)" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl font-bold">← Kembali</button>
+      <button id="btnStep3Next" onclick="goStep(4)" disabled class="btn-primary px-8 py-3 rounded-xl font-bold">Lanjut →</button>
+    </div>
+  </section>
+
+  <!-- ============ STEP 4: SEARCH VIDEOS ============ -->
+  <section id="step-4" class="glass rounded-2xl p-6 md:p-8 fade-in hidden">
+    <h2 class="text-2xl font-bold mb-4">🎥 Step 4: Pencarian Video (Pexels - Bebas Copyright)</h2>
+    <p class="text-slate-400 mb-6 text-sm">Pilih video yang cocok dengan tema. Semua video 100% bebas copyright dari Pexels.</p>
+
+    <div class="flex flex-wrap gap-2 mb-4">
+      <input id="searchQuery" class="flex-1 min-w-[200px] p-3 rounded-lg" placeholder="Keyword pencarian..." />
+      <select id="videoOrientation" class="p-3 rounded-lg">
+        <option value="any">Orientasi: Semua</option>
+        <option value="landscape">Landscape</option>
+        <option value="portrait">Portrait</option>
+        <option value="square">Square</option>
+      </select>
+      <button onclick="searchVideos()" class="btn-primary px-6 py-3 rounded-xl font-bold">🔍 Cari</button>
+    </div>
+
+    <div id="videoSearchProgress" class="hidden mb-4">
+      <div class="spinner"></div> <span class="text-sm">Mencari video...</span>
+    </div>
+
+    <div id="videoGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4"></div>
+
+    <div id="selectedInfo" class="mt-6 p-4 bg-slate-800 rounded-lg hidden">
+      <div class="font-semibold">✅ Video terpilih: <span id="selectedCount">0</span></div>
+      <div class="text-sm text-slate-400">Durasi total akan disesuaikan dengan durasi audio.</div>
+    </div>
+
+    <div class="flex justify-between mt-8">
+      <button onclick="goStep(3)" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl font-bold">← Kembali</button>
+      <button id="btnStep4Next" onclick="goStep(5)" disabled class="btn-primary px-8 py-3 rounded-xl font-bold">Lanjut →</button>
+    </div>
+  </section>
+
+  <!-- ============ STEP 5: CONFIG ============ -->
+  <section id="step-5" class="glass rounded-2xl p-6 md:p-8 fade-in hidden">
+    <h2 class="text-2xl font-bold mb-4">⚙️ Step 5: Konfigurasi Output</h2>
 
     <div class="grid md:grid-cols-2 gap-6">
-      <!-- PREVIEW -->
       <div>
-        <label class="block text-sm font-medium mb-2">📺 Preview</label>
-        <div id="previewWrapper" class="relative bg-black rounded-xl overflow-hidden flex items-center justify-center" style="aspect-ratio:16/9">
-          <canvas id="previewCanvas" width="1280" height="720"></canvas>
-        </div>
-        <div class="flex gap-2 mt-3 flex-wrap">
-          <button id="btnPlayPreview" class="btn bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg font-medium">▶️ Play Preview</button>
-          <button id="btnStopPreview" class="btn bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg font-medium">⏹️ Stop</button>
-          <div id="previewTime" class="text-sm text-slate-400 self-center ml-auto">00:00 / 00:00</div>
-        </div>
+        <label class="block text-sm font-semibold mb-2">📐 Resolusi & Rasio Aspect</label>
+        <select id="resolution" class="w-full p-3 rounded-lg">
+          <option value="1080x1920">📱 1080x1920 (9:16) - TikTok / Reels / Shorts</option>
+          <option value="1920x1080" selected>🖥️ 1920x1080 (16:9) - YouTube / Facebook</option>
+          <option value="1080x1080">⬜ 1080x1080 (1:1) - Instagram Feed</option>
+          <option value="1080x1350">📲 1080x1350 (4:5) - Instagram Portrait</option>
+        </select>
       </div>
+      <div>
+        <label class="block text-sm font-semibold mb-2">🎞️ Frame Rate</label>
+        <select id="fps" class="w-full p-3 rounded-lg">
+          <option value="24">24 FPS (Cinematic)</option>
+          <option value="30" selected>30 FPS (Standard)</option>
+          <option value="60">60 FPS (Smooth)</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-2">✨ Transisi</label>
+        <select id="transition" class="w-full p-3 rounded-lg">
+          <option value="fade" selected>Fade (Halus)</option>
+          <option value="slide">Slide</option>
+          <option value="zoom">Zoom</option>
+          <option value="none">Tanpa Transisi</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-2">💬 Gaya Caption</label>
+        <select id="captionStyle" class="w-full p-3 rounded-lg">
+          <option value="bold-white" selected>Bold Putih (TikTok Style)</option>
+          <option value="yellow">Kuning Highlight</option>
+          <option value="neon">Neon Glow</option>
+          <option value="minimal">Minimal</option>
+          <option value="none">Tanpa Caption</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-2">🎨 Filter Warna</label>
+        <select id="filter" class="w-full p-3 rounded-lg">
+          <option value="none" selected>Normal</option>
+          <option value="warm">Warm (Hangat)</option>
+          <option value="cool">Cool (Dingin)</option>
+          <option value="vintage">Vintage</option>
+          <option value="cinematic">Cinematic</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-2">🔊 Volume Audio</label>
+        <input id="audioVolume" type="range" min="0" max="100" value="100" class="w-full" />
+      </div>
+    </div>
 
-      <!-- SETTINGS -->
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-2">📐 Resolusi Output</label>
-          <select id="outputResolution">
-            <option value="landscape">🖥️ Landscape 16:9 (1920x1080) - YouTube, Facebook</option>
-            <option value="portrait">📱 Portrait 9:16 (1080x1920) - TikTok, Reels, Shorts</option>
-            <option value="square">⬜ Square 1:1 (1080x1080) - Instagram Feed</option>
-          </select>
+    <div class="mt-6 p-4 bg-indigo-900/30 border border-indigo-700 rounded-lg">
+      <div class="font-semibold mb-2">🤖 Fitur Auto Aktif:</div>
+      <div class="flex flex-wrap gap-2">
+        <span class="tag">✅ Auto Sync Audio-Video</span>
+        <span class="tag">✅ Auto Caption Timing</span>
+        <span class="tag">✅ Auto Transisi Smooth</span>
+        <span class="tag">✅ Auto Color Grading</span>
+        <span class="tag">✅ Auto Scene Detection</span>
+        <span class="tag">✅ Auto Beat Matching</span>
+      </div>
+    </div>
+
+    <div class="flex justify-between mt-8">
+      <button onclick="goStep(4)" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl font-bold">← Kembali</button>
+      <button onclick="goStep(6)" class="btn-primary px-8 py-3 rounded-xl font-bold">Lanjut →</button>
+    </div>
+  </section>
+
+  <!-- ============ STEP 6: RENDER ============ -->
+  <section id="step-6" class="glass rounded-2xl p-6 md:p-8 fade-in hidden">
+    <h2 class="text-2xl font-bold mb-4">🎬 Step 6: Render Video</h2>
+    <p class="text-slate-400 mb-6 text-sm">AI sedang merender video dengan semua efek otomatis. Jangan tutup browser.</p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="bg-black rounded-xl overflow-hidden relative" style="aspect-ratio:16/9;">
+          <canvas id="renderCanvas" class="w-full h-full"></canvas>
         </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2">✨ Transisi Otomatis</label>
-          <select id="transitionType">
-            <option value="fade">🌅 Fade (Smooth)</option>
-            <option value="slide">➡️ Slide</option>
-            <option value="zoom">🔍 Zoom</option>
-            <option value="flash">⚡ Flash</option>
-            <option value="none">❌ Tanpa Transisi</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2">💬 Auto Caption</label>
-          <select id="captionStyle">
-            <option value="modern">🎨 Modern (Background Gradient)</option>
-            <option value="classic">📝 Classic (Hitam Semi-Transparan)</option>
-            <option value="bold">💪 Bold (Tebal dengan Outline)</option>
-            <option value="karaoke">🎤 Karaoke Style (Per Kata)</option>
-            <option value="none">❌ Tanpa Caption</option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-sm font-medium mb-2">🎨 Warna Caption</label>
-            <input type="color" id="captionColor" value="#ffffff" class="h-10 w-full" />
+        <div class="mt-4">
+          <div class="flex justify-between text-sm mb-1">
+            <span id="renderStatusText">Menyiapkan...</span>
+            <span id="renderPercent">0%</span>
           </div>
-          <div>
-            <label class="block text-sm font-medium mb-2">📏 Ukuran Font</label>
-            <input type="number" id="captionSize" value="48" min="16" max="120" />
+          <progress id="renderProgress" value="0" max="100"></progress>
+        </div>
+      </div>
+      <div>
+        <div class="bg-slate-800 rounded-xl p-4">
+          <div class="font-semibold mb-3">📊 Info Render</div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between"><span>Resolusi:</span><span id="infoRes">-</span></div>
+            <div class="flex justify-between"><span>Durasi:</span><span id="infoDur">-</span></div>
+            <div class="flex justify-between"><span>FPS:</span><span id="infoFps">-</span></div>
+            <div class="flex justify-between"><span>Clip:</span><span id="infoClip">-</span></div>
+            <div class="flex justify-between"><span>Estimasi:</span><span id="infoEta">-</span></div>
           </div>
         </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2">⏱️ Durasi per Video (detik)</label>
-          <input type="number" id="clipDuration" value="5" min="2" max="30" />
-        </div>
-
-        <div class="flex items-center gap-2">
-          <input type="checkbox" id="autoBeat" checked class="w-4 h-4" />
-          <label for="autoBeat" class="text-sm">🎵 Auto sync dengan beat audio</label>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <input type="checkbox" id="addWatermark" class="w-4 h-4" />
-          <label for="addWatermark" class="text-sm">💧 Tambah watermark (opsional)</label>
-        </div>
-        <input type="text" id="watermarkText" placeholder="Teks watermark..." class="hidden" />
+        <button id="btnStartRender" onclick="startRender()" class="btn-primary w-full mt-4 px-6 py-3 rounded-xl font-bold">
+          ▶️ Mulai Render
+        </button>
       </div>
     </div>
 
-    <div class="mt-6 flex justify-between">
-      <button id="btnBackTo2" class="btn bg-slate-600 hover:bg-slate-500 px-6 py-3 rounded-lg font-semibold">← Kembali</button>
-      <button id="btnToStep4" class="btn bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 px-6 py-3 rounded-lg font-semibold">Lanjut ke Export →</button>
+    <div class="flex justify-between mt-8">
+      <button onclick="goStep(5)" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl font-bold">← Kembali</button>
+      <button id="btnStep6Next" onclick="goStep(7)" disabled class="btn-primary px-8 py-3 rounded-xl font-bold">Lanjut →</button>
     </div>
   </section>
 
-  <!-- STEP 4: EXPORT -->
-  <section id="step4" class="glass rounded-2xl p-6 mb-6 hidden">
-    <h2 class="text-2xl font-bold mb-4">💾 Step 4: Export & Render Video</h2>
-    <p class="text-slate-400 mb-4">Render video final dengan semua efek, caption, dan transisi. Proses dilakukan di browser Anda (client-side).</p>
+  <!-- ============ STEP 7: SEO ============ -->
+  <section id="step-7" class="glass rounded-2xl p-6 md:p-8 fade-in hidden">
+    <h2 class="text-2xl font-bold mb-4">🚀 Step 7: Judul & Deskripsi SEO + HOOK</h2>
+    <p class="text-slate-400 mb-6 text-sm">AI membuat judul viral + deskripsi SEO-optimized + hashtag trending.</p>
 
-    <div id="renderProgress" class="mb-4 hidden">
-      <div class="flex justify-between text-sm mb-2">
-        <span id="renderStatus">Mempersiapkan...</span>
-        <span id="renderPercent">0%</span>
+    <button id="btnGenerateSEO" onclick="generateSEO()" class="btn-primary px-6 py-3 rounded-xl font-bold mb-6">
+      ✨ Generate dengan AI
+    </button>
+
+    <div id="seoResult" class="hidden space-y-4">
+      <div>
+        <label class="block text-sm font-semibold mb-2">📌 Judul (5 variasi):</label>
+        <div id="titleList" class="space-y-2"></div>
       </div>
-      <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-        <div id="renderBar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all" style="width:0%"></div>
+      <div>
+        <label class="block text-sm font-semibold mb-2">📝 Deskripsi SEO:</label>
+        <textarea id="descText" rows="8" class="w-full p-3 rounded-lg"></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-2"># Hashtag:</label>
+        <div id="hashtagList" class="flex flex-wrap gap-2"></div>
+        <button onclick="copyHashtags()" class="mt-2 text-sm bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded">📋 Copy</button>
       </div>
     </div>
 
-    <div class="flex flex-wrap gap-3">
-      <button id="btnRender" class="btn bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 px-6 py-3 rounded-lg font-semibold">🎬 Render & Download Video</button>
-      <button id="btnBackTo3" class="btn bg-slate-600 hover:bg-slate-500 px-6 py-3 rounded-lg font-semibold">← Kembali</button>
-    </div>
-
-    <div id="downloadBox" class="mt-4 hidden">
-      <div class="bg-green-900/30 border border-green-500/50 rounded-lg p-4">
-        <p class="text-green-400 font-semibold mb-2">✅ Video berhasil di-render!</p>
-        <a id="downloadLink" download="ai-video-creator.webm" class="btn inline-block bg-green-600 hover:bg-green-500 px-6 py-2 rounded-lg font-semibold">📥 Download Video</a>
-      </div>
+    <div class="flex justify-between mt-8">
+      <button onclick="goStep(6)" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl font-bold">← Kembali</button>
+      <button onclick="goStep(8)" class="btn-primary px-8 py-3 rounded-xl font-bold">Lanjut →</button>
     </div>
   </section>
 
-  <!-- STEP 5: SEO -->
-  <section id="step5" class="glass rounded-2xl p-6 mb-6 hidden">
-    <h2 class="text-2xl font-bold mb-4">🚀 Step 5: Judul, Deskripsi & Hashtag SEO</h2>
-    <p class="text-slate-400 mb-4">AI akan generate judul viral, deskripsi SEO, dan hashtag yang hook-able untuk TikTok/Reels/YouTube.</p>
+  <!-- ============ STEP 8: DOWNLOAD ============ -->
+  <section id="step-8" class="glass rounded-2xl p-6 md:p-8 fade-in hidden">
+    <h2 class="text-2xl font-bold mb-4">💾 Step 8: Download & Publish</h2>
+    <p class="text-slate-400 mb-6 text-sm">Video siap publish! Download dan upload ke platform favorit.</p>
 
-    <div class="flex flex-wrap gap-2 mb-4">
-      <select id="seoPlatform">
-        <option value="tiktok">📱 TikTok</option>
-        <option value="reels">📷 Instagram Reels</option>
-        <option value="youtube">▶️ YouTube Long</option>
-        <option value="shorts">⚡ YouTube Shorts</option>
-        <option value="facebook">👥 Facebook</option>
-      </select>
-      <select id="seoTone">
-        <option value="viral">🔥 Viral & Hook</option>
-        <option value="professional">💼 Profesional</option>
-        <option value="funny">😂 Lucu & Menghibur</option>
-        <option value="educational">📚 Edukatif</option>
-        <option value="emotional">💝 Emosional</option>
-      </select>
-      <button id="btnGenerateSEO" class="btn bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 px-6 py-2 rounded-lg font-semibold">✨ Generate SEO Content</button>
-    </div>
-
-    <div id="seoStatus" class="text-sm text-slate-400 mb-4"></div>
-
-    <div id="seoResults" class="space-y-4 hidden">
+    <div class="grid md:grid-cols-2 gap-6">
       <div>
-        <label class="block text-sm font-medium mb-2">🎯 Judul (3 Variasi)</label>
-        <div id="seoTitles" class="space-y-2"></div>
+        <video id="finalVideo" controls class="w-full rounded-xl bg-black"></video>
+        <button onclick="downloadVideo()" class="btn-primary w-full mt-4 px-6 py-3 rounded-xl font-bold">
+          💾 Download Video (MP4/WebM)
+        </button>
       </div>
-      <div>
-        <label class="block text-sm font-medium mb-2">📝 Deskripsi SEO</label>
-        <textarea id="seoDescription" rows="6"></textarea>
-        <button data-copy="seoDescription" class="btn copy-btn bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg text-sm mt-2">📋 Copy</button>
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-2"># Hashtags</label>
-        <textarea id="seoHashtags" rows="3"></textarea>
-        <button data-copy="seoHashtags" class="btn copy-btn bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg text-sm mt-2">📋 Copy</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- SETTINGS MODAL -->
-  <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold">⚙️ Pengaturan API</h2>
-        <button id="btnCloseSettings" class="text-2xl hover:text-red-400">✕</button>
-      </div>
-
       <div class="space-y-4">
-        <div class="bg-blue-900/30 border border-blue-500/50 rounded-lg p-3 text-sm">
-          <p class="font-semibold text-blue-300 mb-1">💡 Cara mendapatkan API Key:</p>
-          <ul class="text-blue-200 text-xs space-y-1 list-disc list-inside">
-            <li><b>Pexels API</b> (WAJIB): Daftar gratis di <a href="https://www.pexels.com/api/" target="_blank" class="underline">pexels.com/api</a></li>
-            <li><b>Groq API</b> (UNTUK AI): Daftar gratis di <a href="https://console.groq.com" target="_blank" class="underline">console.groq.com</a> — support Whisper + LLM cepat</li>
-            <li><b>Gemini API</b> (ALTERNATIF): Daftar di <a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline">aistudio.google.com</a></li>
-          </ul>
+        <div class="bg-slate-800 rounded-xl p-4">
+          <div class="font-semibold mb-3">📤 Upload ke Platform</div>
+          <div class="space-y-2 text-sm">
+            <a href="https://www.tiktok.com/upload" target="_blank" class="block p-3 bg-slate-700 hover:bg-slate-600 rounded-lg">📱 TikTok</a>
+            <a href="https://www.instagram.com/" target="_blank" class="block p-3 bg-slate-700 hover:bg-slate-600 rounded-lg">📸 Instagram Reels</a>
+            <a href="https://studio.youtube.com/" target="_blank" class="block p-3 bg-slate-700 hover:bg-slate-600 rounded-lg">▶️ YouTube / Shorts</a>
+            <a href="https://www.facebook.com/" target="_blank" class="block p-3 bg-slate-700 hover:bg-slate-600 rounded-lg">👥 Facebook</a>
+          </div>
         </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2">🔑 Pexels API Key <span class="text-red-400">*</span></label>
-          <input type="password" id="pexelsKey" placeholder="Masukkan Pexels API Key" />
-          <button data-test="pexels" class="btn test-btn bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-sm mt-2">🧪 Test Koneksi</button>
-          <div data-status="pexels" class="text-sm mt-1"></div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2">🤖 AI Provider</label>
-          <select id="aiProvider">
-            <option value="groq">Groq (Recommended - Cepat & Gratis)</option>
-            <option value="gemini">Google Gemini</option>
-            <option value="none">Tanpa AI (Fitur AI dinonaktifkan)</option>
-          </select>
-        </div>
-
-        <div id="groqSection">
-          <label class="block text-sm font-medium mb-2">🔑 Groq API Key</label>
-          <input type="password" id="groqKey" placeholder="gsk_..." />
-          <button data-test="groq" class="btn test-btn bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-sm mt-2">🧪 Test Koneksi</button>
-          <div data-status="groq" class="text-sm mt-1"></div>
-        </div>
-
-        <div id="geminiSection" class="hidden">
-          <label class="block text-sm font-medium mb-2">🔑 Gemini API Key</label>
-          <input type="password" id="geminiKey" placeholder="AIza..." />
-          <button data-test="gemini" class="btn test-btn bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-sm mt-2">🧪 Test Koneksi</button>
-          <div data-status="gemini" class="text-sm mt-1"></div>
-        </div>
-
-        <div class="flex gap-2 pt-4">
-          <button id="btnSaveSettings" class="btn bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 px-6 py-3 rounded-lg font-semibold flex-1">💾 Simpan Settings</button>
+        <div class="bg-slate-800 rounded-xl p-4">
+          <div class="font-semibold mb-2">📊 Metadata</div>
+          <div id="finalMeta" class="text-sm text-slate-400"></div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- TOAST CONTAINER -->
-  <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    <div class="flex justify-between mt-8">
+      <button onclick="goStep(7)" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl font-bold">← Kembali</button>
+      <button onclick="resetApp()" class="bg-emerald-600 hover:bg-emerald-500 px-8 py-3 rounded-xl font-bold">🔄 Buat Video Baru</button>
+    </div>
+  </section>
+
+  <!-- TOAST -->
+  <div id="toast" class="fixed bottom-6 right-6 glass rounded-xl p-4 max-w-sm hidden z-50"></div>
 
 </div>
 
 <script>
-/* ============================================================
-   AI VIDEO CREATOR PRO - Main Application Logic
-   ============================================================ */
-
-const STATE = {
-  audioFile: null,
-  audioBuffer: null,
-  audioElement: null,
-  transcript: '',
-  transcriptSegments: [], // [{start, end, text}]
-  videos: [], // hasil search
-  selectedVideos: [], // video terpilih
-  settings: {
-    pexelsKey: '',
-    aiProvider: 'groq',
-    groqKey: '',
-    geminiKey: ''
-  },
-  isRecording: false,
-  mediaRecorder: null,
-  recordedChunks: [],
-  isRendering: false,
-  previewAnimation: null
+/* =========================================================
+   STATE MANAGEMENT
+========================================================= */
+const state = {
+  groqKey: '', geminiKey: '', pexelsKey: '',
+  llmProvider: 'groq',
+  audioFile: null, audioBuffer: null, audioDuration: 0,
+  transcript: '', themes: [],
+  videos: [], selectedVideos: [],
+  config: {},
+  renderedBlob: null,
+  seo: { titles: [], description: '', hashtags: [] }
 };
 
-/* ---------------- UTILITIES ---------------- */
-const $ = (id) => document.getElementById(id);
-const $$ = (sel) => document.querySelectorAll(sel);
+/* =========================================================
+   UTILITIES
+========================================================= */
+function $(id){ return document.getElementById(id); }
+function toast(msg, type='info'){
+  const t = $('toast');
+  t.className = `fixed bottom-6 right-6 glass rounded-xl p-4 max-w-sm z-50 fade-in ${type==='error'?'border-l-4 border-red-500':type==='success'?'border-l-4 border-emerald-500':'border-l-4 border-indigo-500'}`;
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(()=>t.classList.add('hidden'), 4000);
+}
+function showError(msg){ toast(msg,'error'); console.error(msg); }
+function showSuccess(msg){ toast(msg,'success'); }
 
-function toast(msg, type='info', duration=3500){
-  const el = document.createElement('div');
-  const colors = {
-    info:'bg-blue-600', success:'bg-green-600', error:'bg-red-600', warn:'bg-yellow-600'
-  };
-  el.className = `toast ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg max-w-sm`;
-  el.textContent = msg;
-  $('toastContainer').appendChild(el);
-  setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),300)}, duration);
+/* =========================================================
+   STEP NAVIGATION
+========================================================= */
+function goStep(n){
+  // Validasi sebelum maju
+  if(n===2 && !state.groqKey && !state.geminiKey){ showError('Set minimal 1 API key (Groq/Gemini)'); return; }
+  if(n===2 && !state.pexelsKey){ showError('Pexels API key wajib diisi'); return; }
+  if(n===3 && !state.audioFile){ showError('Upload audio dulu'); return; }
+  if(n===4 && !state.transcript){ showError('Transkripsi dulu'); return; }
+  if(n===5 && state.selectedVideos.length===0){ showError('Pilih minimal 1 video'); return; }
+  if(n===7 && !state.renderedBlob){ showError('Render video dulu'); return; }
+
+  for(let i=1;i<=8;i++){
+    $('step-'+i).classList.add('hidden');
+    const ind = $('step-ind-'+i);
+    ind.className = 'px-4 py-2 rounded-full text-sm font-semibold ' + (i<n?'step-done':i===n?'step-active':'step-pending');
+  }
+  $('step-'+n).classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
-function fmtTime(s){
-  const m = Math.floor(s/60), sec = Math.floor(s%60);
-  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-}
-
-function saveSettings(){
-  localStorage.setItem('aivcp_settings', JSON.stringify(STATE.settings));
-}
-function loadSettings(){
+/* =========================================================
+   API KEY TEST
+========================================================= */
+async function testAPI(type){
+  const key = $(type+'Key').value.trim();
+  if(!key){ $(type+'Status').innerHTML = '<span class="text-red-400">❌ Key kosong</span>'; return; }
+  $(type+'Status').innerHTML = '<span class="text-yellow-400"><span class="spinner"></span> Testing...</span>';
   try{
-    const s = JSON.parse(localStorage.getItem('aivcp_settings') || '{}');
-    Object.assign(STATE.settings, s);
-  }catch(e){}
-}
-
-/* ---------------- STEPPER ---------------- */
-function goToStep(n){
-  for(let i=1;i<=5;i++){
-    const sec = $('step'+i);
-    const dot = document.querySelector(`.step-dot[data-step="${i}"]`);
-    const line = document.querySelectorAll('.step-line')[i-2];
-    if(i===n){
-      sec.classList.remove('hidden');
-      dot.classList.add('active');
-      dot.classList.remove('done');
-    } else if(i<n){
-      sec.classList.add('hidden');
-      dot.classList.remove('active');
-      dot.classList.add('done');
-      if(line) line.classList.add('done');
-    } else {
-      sec.classList.add('hidden');
-      dot.classList.remove('active','done');
-      if(line) line.classList.remove('done');
+    if(type==='groq'){
+      const r = await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':'Bearer '+key}});
+      if(!r.ok) throw new Error('Invalid');
+      state.groqKey = key; localStorage.setItem('groqKey',key);
+      $(type+'Status').innerHTML = '<span class="text-emerald-400">✅ Terhubung</span>';
+      showSuccess('Groq API connected!');
+    } else if(type==='gemini'){
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+      if(!r.ok) throw new Error('Invalid');
+      state.geminiKey = key; localStorage.setItem('geminiKey',key);
+      $(type+'Status').innerHTML = '<span class="text-emerald-400">✅ Terhubung</span>';
+      showSuccess('Gemini API connected!');
+    } else if(type==='pexels'){
+      const r = await fetch('https://api.pexels.com/videos/search?query=nature&per_page=1',{headers:{'Authorization':key}});
+      if(!r.ok) throw new Error('Invalid');
+      state.pexelsKey = key; localStorage.setItem('pexelsKey',key);
+      $(type+'Status').innerHTML = '<span class="text-emerald-400">✅ Terhubung</span>';
+      showSuccess('Pexels API connected!');
     }
+  }catch(e){
+    $(type+'Status').innerHTML = '<span class="text-red-400">❌ Gagal: '+e.message+'</span>';
+    showError(type+' API key tidak valid');
   }
-  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/* ---------------- SETTINGS MODAL ---------------- */
-$('btnSettings').onclick = () => {
-  $('pexelsKey').value = STATE.settings.pexelsKey;
-  $('groqKey').value = STATE.settings.groqKey;
-  $('geminiKey').value = STATE.settings.geminiKey;
-  $('aiProvider').value = STATE.settings.aiProvider;
-  toggleAIProvider();
-  $('settingsModal').classList.remove('hidden');
-};
-$('btnCloseSettings').onclick = () => $('settingsModal').classList.add('hidden');
-$('btnSaveSettings').onclick = () => {
-  STATE.settings.pexelsKey = $('pexelsKey').value.trim();
-  STATE.settings.groqKey = $('groqKey').value.trim();
-  STATE.settings.geminiKey = $('geminiKey').value.trim();
-  STATE.settings.aiProvider = $('aiProvider').value;
-  if(!STATE.settings.pexelsKey){
-    toast('Pexels API Key WAJIB diisi!', 'error');
-    return;
-  }
-  saveSettings();
-  toast('✅ Settings tersimpan!', 'success');
-  $('settingsModal').classList.add('hidden');
-};
-$('aiProvider').onchange = toggleAIProvider;
-function toggleAIProvider(){
-  const v = $('aiProvider').value;
-  $('groqSection').classList.toggle('hidden', v!=='groq');
-  $('geminiSection').classList.toggle('hidden', v!=='gemini');
-}
-
-/* ---------------- TEST CONNECTION ---------------- */
-$$('.test-btn').forEach(btn => {
-  btn.onclick = async () => {
-    const type = btn.dataset.test;
-    const statusEl = document.querySelector(`[data-status="${type}"]`);
-    statusEl.innerHTML = '<span class="text-blue-400">🔄 Testing...</span>';
-    try{
-      if(type==='pexels'){
-        const key = $('pexelsKey').value.trim();
-        if(!key) throw new Error('Key kosong');
-        const r = await fetch('https://api.pexels.com/videos/popular?per_page=1', {headers:{Authorization:key}});
-        if(!r.ok) throw new Error('Key tidak valid / limit habis');
-        statusEl.innerHTML = '<span class="text-green-400">✅ Terhubung! Key valid.</span>';
-      } else if(type==='groq'){
-        const key = $('groqKey').value.trim();
-        if(!key) throw new Error('Key kosong');
-        const r = await fetch('https://api.groq.com/openai/v1/models', {headers:{Authorization:`Bearer ${key}`}});
-        if(!r.ok) throw new Error('Key tidak valid');
-        statusEl.innerHTML = '<span class="text-green-400">✅ Terhubung! Groq API aktif.</span>';
-      } else if(type==='gemini'){
-        const key = $('geminiKey').value.trim();
-        if(!key) throw new Error('Key kosong');
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
-        if(!r.ok) throw new Error('Key tidak valid');
-        statusEl.innerHTML = '<span class="text-green-400">✅ Terhubung! Gemini API aktif.</span>';
-      }
-    }catch(e){
-      statusEl.innerHTML = `<span class="text-red-400">❌ Gagal: ${e.message}</span>`;
-    }
-  };
+/* Load saved keys */
+window.addEventListener('DOMContentLoaded',()=>{
+  ['groqKey','geminiKey','pexelsKey'].forEach(k=>{
+    const v = localStorage.getItem(k);
+    if(v){ $(k).value = v; state[k] = v; }
+  });
 });
 
-/* ---------------- AUDIO UPLOAD ---------------- */
-$('audioFile').onchange = (e) => {
+/* =========================================================
+   AUDIO UPLOAD
+========================================================= */
+function handleAudioUpload(e){
   const f = e.target.files[0];
   if(!f) return;
-  STATE.audioFile = f;
-  const url = URL.createObjectURL(f);
-  const player = $('audioPlayer');
-  player.src = url;
-  player.classList.remove('hidden');
-  $('btnTranscribe').disabled = false;
-  toast('✅ Audio dimuat: '+f.name, 'success');
-};
+  if(f.size > 25*1024*1024){ showError('File > 25MB'); return; }
+  state.audioFile = f;
+  $('audioPlayer').src = URL.createObjectURL(f);
+  $('audioPreview').classList.remove('hidden');
+  $('audioInfo').textContent = `${f.name} • ${(f.size/1024/1024).toFixed(2)} MB`;
+  
+  // Get duration
+  const audio = new Audio(URL.createObjectURL(f));
+  audio.addEventListener('loadedmetadata',()=>{
+    state.audioDuration = audio.duration;
+    $('audioInfo').textContent += ` • ${audio.duration.toFixed(1)}s`;
+    $('btnStep2Next').disabled = false;
+  });
+  audio.addEventListener('error',()=>showError('Audio tidak valid'));
+}
 
-/* ---------------- RECORD AUDIO ---------------- */
-$('btnRecord').onclick = async () => {
+/* =========================================================
+   TRANSCRIBE + ANALYZE
+========================================================= */
+async function runTranscribeAndAnalyze(){
+  if(!state.audioFile){ showError('Upload audio dulu'); return; }
+  $('btnTranscribe').disabled = true;
+  $('transcribeProgress').classList.remove('hidden');
+  $('transcribeResult').classList.add('hidden');
+
   try{
-    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-    STATE.recordedChunks = [];
-    STATE.mediaRecorder = new MediaRecorder(stream);
-    STATE.mediaRecorder.ondataavailable = e => { if(e.data.size>0) STATE.recordedChunks.push(e.data); };
-    STATE.mediaRecorder.onstop = () => {
-      const blob = new Blob(STATE.recordedChunks, {type:'audio/webm'});
-      const file = new File([blob], 'recording.webm', {type:'audio/webm'});
-      STATE.audioFile = file;
-      const url = URL.createObjectURL(blob);
-      const player = $('audioPlayer');
-      player.src = url;
-      player.classList.remove('hidden');
-      $('btnTranscribe').disabled = false;
-      stream.getTracks().forEach(t=>t.stop());
-      toast('✅ Rekaman selesai!', 'success');
-    };
-    STATE.mediaRecorder.start();
-    STATE.isRecording = true;
-    $('btnRecord').disabled = true;
-    $('btnStopRecord').disabled = false;
-    $('recordStatus').innerHTML = '<span class="text-red-400">🔴 Merekam...</span>';
+    // 1. Transcribe with Groq Whisper
+    $('transcribeStatusText').textContent = 'Mentranskrip audio dengan Whisper...';
+    $('transcribeProgressBar').value = 30;
+
+    const formData = new FormData();
+    formData.append('file', state.audioFile);
+    formData.append('model','whisper-large-v3');
+    formData.append('response_format','json');
+
+    const tr = await fetch('https://api.groq.com/openai/v1/audio/transcriptions',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+state.groqKey},
+      body: formData
+    });
+    if(!tr.ok) throw new Error('Transkripsi gagal: '+tr.status);
+    const trData = await tr.json();
+    state.transcript = trData.text || '';
+    $('transcribeProgressBar').value = 60;
+
+    // 2. Analyze theme with LLM
+    $('transcribeStatusText').textContent = 'Menganalisis tema dengan AI...';
+    const prompt = `Analisis transkrip berikut dan kembalikan JSON dengan format:
+{"themes":["keyword1","keyword2",...],"language":"id/en"}
+Transkrip: "${state.transcript.substring(0,1500)}"
+Berikan 5-8 keyword bahasa Inggris yang menggambarkan tema visual untuk pencarian video stock. HANYA JSON, tanpa markdown.`;
+
+    const llmRes = await callLLM(prompt);
+    $('transcribeProgressBar').value = 100;
+
+    let themes = ['nature','city','people'];
+    try{
+      const cleaned = llmRes.replace(/```json|```/g,'').trim();
+      const parsed = JSON.parse(cleaned);
+      themes = parsed.themes || themes;
+      if(parsed.language) $('audioLang').value = parsed.language;
+    }catch(e){ console.warn('Parse theme failed, using fallback'); }
+
+    state.themes = themes;
+    $('transcriptText').value = state.transcript;
+    $('themeInput').value = themes.join(', ');
+    $('themeTags').innerHTML = themes.map(t=>`<span class="tag">${t}</span>`).join('');
+    $('transcribeResult').classList.remove('hidden');
+    $('btnStep3Next').disabled = false;
+    showSuccess('Transkripsi & analisis selesai!');
   }catch(e){
-    toast('❌ Gagal akses mic: '+e.message, 'error');
+    showError(e.message);
+    // Fallback: manual input
+    $('transcribeResult').classList.remove('hidden');
+    $('btnStep3Next').disabled = false;
+  }finally{
+    $('btnTranscribe').disabled = false;
+    $('transcribeProgress').classList.add('hidden');
   }
-};
-$('btnStopRecord').onclick = () => {
-  if(STATE.mediaRecorder && STATE.isRecording){
-    STATE.mediaRecorder.stop();
-    STATE.isRecording = false;
-    $('btnRecord').disabled = false;
-    $('btnStopRecord').disabled = true;
-    $('recordStatus').innerHTML = '';
+}
+
+/* =========================================================
+   LLM CALLER (Groq / Gemini)
+========================================================= */
+async function callLLM(prompt){
+  const provider = $('llmProvider').value;
+  if(provider==='groq'){
+    if(!state.groqKey) throw new Error('Groq key kosong');
+    const r = await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+state.groqKey,'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        messages:[{role:'user',content:prompt}],
+        temperature:0.7
+      })
+    });
+    if(!r.ok) throw new Error('Groq error: '+r.status);
+    const d = await r.json();
+    return d.choices[0].message.content;
+  } else {
+    if(!state.geminiKey) throw new Error('Gemini key kosong');
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.geminiKey}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+    });
+    if(!r.ok) throw new Error('Gemini error: '+r.status);
+    const d = await r.json();
+    return d.candidates[0].content.parts[0].text;
   }
-};
+}
 
-/* ---------------- TRANSCRIBE (Groq Whisper / Gemini) ---------------- */
-$('btnTranscribe').onclick = async () => {
-  if(!STATE.audioFile){ toast('Upload audio dulu!','error'); return; }
-  const status = $('transcribeStatus');
-  status.innerHTML = '<span class="loader"></span> <span class="text-blue-400">Mentranskrip audio...</span>';
-
-  if(STATE.settings.aiProvider === 'none' || (!STATE.settings.groqKey && !STATE.settings.geminiKey)){
-    // fallback: tanpa AI, minta user input manual
-    status.innerHTML = '<span class="text-yellow-400">⚠️ AI tidak dikonfigurasi. Silakan ketik transkrip manual.</span>';
-    $('transcriptBox').classList.remove('hidden');
-    $('transcriptText').value = '';
-    $('transcriptText').placeholder = 'Ketik transkrip manual di sini...';
-    toast('AI tidak aktif. Silakan ketik transkrip manual atau atur API key di Settings.', 'warn', 5000);
-    return;
-  }
-
+/* =========================================================
+   SEARCH VIDEOS (PEXELS)
+========================================================= */
+async function searchVideos(){
+  const q = $('searchQuery').value.trim() || state.themes[0] || 'nature';
+  const orient = $('videoOrientation').value;
+  $('videoSearchProgress').classList.remove('hidden');
+  $('videoGrid').innerHTML = '';
   try{
-    let result;
-    if(STATE.settings.aiProvider === 'groq'){
-      result = await transcribeWithGroq(STATE.audioFile);
-    } else {
-      result = await transcribeWithGemini(STATE.audioFile);
-    }
-    STATE.transcript = result.text;
-    STATE.transcriptSegments = result.segments || [];
-    $('transcriptText').value = result.text;
-    $('transcriptBox').classList.remove('hidden');
-    $('transcriptMeta').textContent = `⏱️ Durasi: ${fmtTime(result.duration||0)} | ${result.segments?.length||0} segmen`;
-    status.innerHTML = '<span class="text-green-400">✅ Transkrip selesai!</span>';
-    toast('✅ Transkrip berhasil!', 'success');
-  }catch(e){
-    console.error(e);
-    status.innerHTML = `<span class="text-red-400">❌ Gagal: ${e.message}</span>`;
-    toast('❌ Transkrip gagal: '+e.message, 'error');
-  }
-};
-
-async function transcribeWithGroq(file){
-  const form = new FormData();
-  form.append('file', file);
-  form.append('model', 'whisper-large-v3-turbo');
-  form.append('response_format', 'verbose_json');
-  form.append('language', 'id');
-  const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-    method:'POST',
-    headers:{Authorization:`Bearer ${STATE.settings.groqKey}`},
-    body: form
-  });
-  if(!r.ok){
-    const err = await r.text();
-    throw new Error('Groq error: '+err.slice(0,200));
-  }
-  const data = await r.json();
-  const segments = (data.segments||[]).map(s => ({start:s.start, end:s.end, text:s.text.trim()}));
-  return { text: data.text, segments, duration: data.duration };
-}
-
-async function transcribeWithGemini(file){
-  // Gemini 1.5/2.0 Flash support audio input
-  const base64 = await fileToBase64(file);
-  const body = {
-    contents: [{
-      parts: [
-        { inline_data: { mime_type: file.type || 'audio/webm', data: base64 } },
-        { text: 'Transkrip audio ini ke teks. Kembalikan JSON dengan format: {"text":"...","segments":[{"start":0,"end":1,"text":"..."}],"duration":0}' }
-      ]
-    }],
-    generationConfig: { responseMimeType: 'application/json' }
-  };
-  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.settings.geminiKey}`, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(body)
-  });
-  if(!r.ok){ const err = await r.text(); throw new Error('Gemini error: '+err.slice(0,200)); }
-  const data = await r.json();
-  const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  let parsed;
-  try{ parsed = JSON.parse(txt); }catch(e){ parsed = { text: txt, segments: [], duration: 0 }; }
-  return parsed;
-}
-
-function fileToBase64(file){
-  return new Promise((res,rej)=>{
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-}
-
-/* ---------------- SEARCH VIDEO (Pexels) ---------------- */
-$('btnSearch').onclick = async () => {
-  if(!STATE.settings.pexelsKey){ toast('Atur Pexels API Key di Settings!','error'); return; }
-  const kw = $('searchKeyword').value.trim();
-  if(!kw){ toast('Masukkan keyword pencarian!','error'); return; }
-  const orient = $('searchOrientation').value;
-  const status = $('searchStatus');
-  status.innerHTML = '<span class="loader"></span> <span class="text-blue-400">Mencari video...</span>';
-  try{
-    let url = `https://api.pexels.com/videos/search?query=${encodeURIComponent(kw)}&per_page=30&orientation=${orient==='all'?'':orient}`;
-    const r = await fetch(url, {headers:{Authorization: STATE.settings.pexelsKey}});
-    if(!r.ok) throw new Error('Gagal fetch Pexels');
-    const data = await r.json();
-    STATE.videos = data.videos || [];
+    let url = `https://api.pexels.com/videos/search?query=${encodeURIComponent(q)}&per_page=30&orientation=${orient}`;
+    const r = await fetch(url,{headers:{'Authorization':state.pexelsKey}});
+    if(!r.ok) throw new Error('Pexels error');
+    const d = await r.json();
+    state.videos = d.videos || [];
     renderVideoGrid();
-    status.innerHTML = `<span class="text-green-400">✅ Ditemukan ${STATE.videos.length} video</span>`;
+    showSuccess(`${state.videos.length} video ditemukan`);
   }catch(e){
-    status.innerHTML = `<span class="text-red-400">❌ ${e.message}</span>`;
-    toast('❌ Search gagal: '+e.message, 'error');
+    showError('Gagal cari video: '+e.message);
+  }finally{
+    $('videoSearchProgress').classList.add('hidden');
   }
-};
+}
 
 function renderVideoGrid(){
   const grid = $('videoGrid');
-  grid.innerHTML = '';
-  if(STATE.videos.length===0){
-    grid.innerHTML = '<p class="text-slate-400 col-span-full text-center py-8">Tidak ada video ditemukan</p>';
-    return;
-  }
-  STATE.videos.forEach((v,idx) => {
-    const pic = v.image; // thumbnail
-    const vid = v.video_files.find(f => f.quality==='hd' && f.width && f.width>=1280) || v.video_files[0];
-    const card = document.createElement('div');
-    card.className = 'video-card glass rounded-xl overflow-hidden';
-    card.dataset.idx = idx;
-    card.innerHTML = `
-      <div class="relative aspect-video bg-slate-800">
-        <img src="${pic}" class="w-full h-full object-cover" loading="lazy" />
-        <div class="absolute bottom-1 right-1 bg-black/70 text-xs px-2 py-1 rounded">${v.duration}s</div>
-        <div class="absolute top-1 left-1 bg-indigo-600/90 text-xs px-2 py-1 rounded hidden check-mark">✓</div>
+  grid.innerHTML = state.videos.map((v,i)=>`
+    <div class="video-card glass rounded-xl overflow-hidden" data-idx="${i}" onclick="toggleVideo(${i})">
+      <video src="${v.video_files.find(f=>f.quality==='sd'&&f.width&&f.width>=640)?.link || v.video_files[0].link}" 
+             class="w-full aspect-video object-cover" muted preload="metadata"></video>
+      <div class="p-2 text-xs">
+        <div class="truncate">${v.user.name}</div>
+        <div class="text-slate-400">${v.duration}s</div>
       </div>
-      <div class="p-2 text-xs text-slate-300">📹 ${v.user.name}</div>
-    `;
-    card.onclick = () => toggleVideoSelect(idx, card);
-    grid.appendChild(card);
-  });
+    </div>
+  `).join('');
 }
 
-function toggleVideoSelect(idx, card){
-  const exists = STATE.selectedVideos.find(v => v.idx === idx);
-  if(exists){
-    STATE.selectedVideos = STATE.selectedVideos.filter(v => v.idx !== idx);
+function toggleVideo(i){
+  const card = document.querySelector(`[data-idx="${i}"]`);
+  const v = state.videos[i];
+  const idx = state.selectedVideos.findIndex(x=>x.id===v.id);
+  if(idx>=0){
+    state.selectedVideos.splice(idx,1);
     card.classList.remove('selected');
-    card.querySelector('.check-mark').classList.add('hidden');
   } else {
-    const v = STATE.videos[idx];
-    const vidFile = v.video_files.find(f => f.quality==='hd' && f.width && f.width>=1280) || v.video_files.find(f=>f.file_type==='video/mp4') || v.video_files[0];
-    STATE.selectedVideos.push({ idx, data:v, file: vidFile });
+    state.selectedVideos.push(v);
     card.classList.add('selected');
-    card.querySelector('.check-mark').classList.remove('hidden');
   }
-  $('selectionInfo').textContent = `${STATE.selectedVideos.length} video terpilih`;
-  $('btnToStep3').disabled = STATE.selectedVideos.length === 0;
+  $('selectedCount').textContent = state.selectedVideos.length;
+  $('selectedInfo').classList.toggle('hidden', state.selectedVideos.length===0);
+  $('btnStep4Next').disabled = state.selectedVideos.length===0;
 }
 
-/* ---------------- NAVIGATION ---------------- */
-$('btnToStep3').onclick = () => {
-  // auto pilih resolusi sesuai orientasi video pertama
-  if(STATE.selectedVideos.length>0){
-    const first = STATE.selectedVideos[0];
-    const w = first.file.width, h = first.file.height;
-    if(w && h){
-      if(h > w) $('outputResolution').value = 'portrait';
-      else if(w === h) $('outputResolution').value = 'square';
-      else $('outputResolution').value = 'landscape';
-    }
+/* Auto-search saat masuk step 4 */
+const origGoStep = goStep;
+goStep = function(n){
+  origGoStep(n);
+  if(n===4 && state.videos.length===0){
+    $('searchQuery').value = state.themes.join(' ') || 'nature';
+    searchVideos();
   }
-  goToStep(3);
-  initPreview();
-};
-$('btnBackTo2').onclick = () => goToStep(2);
-$('btnToStep4').onclick = () => goToStep(4);
-$('btnBackTo3').onclick = () => goToStep(3);
-
-/* ---------------- PREVIEW & RENDER ENGINE ---------------- */
-function getResolution(){
-  const v = $('outputResolution').value;
-  if(v==='portrait') return {w:1080, h:1920, ratio:'9/16'};
-  if(v==='square') return {w:1080, h:1080, ratio:'1/1'};
-  return {w:1920, h:1080, ratio:'16/9'};
-}
-
-function initPreview(){
-  const res = getResolution();
-  const canvas = $('previewCanvas');
-  canvas.width = res.w;
-  canvas.height = res.h;
-  $('previewWrapper').style.aspectRatio = res.ratio;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0,0,res.w,res.h);
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 32px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Klik "Play Preview" untuk melihat', res.w/2, res.h/2);
-}
-
-$('outputResolution').onchange = () => {
-  initPreview();
 };
 
-$('addWatermark').onchange = (e) => {
-  $('watermarkText').classList.toggle('hidden', !e.target.checked);
-};
-
-/* ---------------- PLAY PREVIEW ---------------- */
-let previewState = null;
-
-$('btnPlayPreview').onclick = async () => {
-  if(STATE.selectedVideos.length===0){ toast('Pilih video dulu!','error'); return; }
-  if(previewState) stopPreview();
-
-  const canvas = $('previewCanvas');
-  const ctx = canvas.getContext('2d');
-  const res = getResolution();
-  const clipDur = parseFloat($('clipDuration').value) || 5;
-  const transType = $('transitionType').value;
+/* =========================================================
+   VIDEO RENDERING (Canvas + MediaRecorder)
+========================================================= */
+async function startRender(){
+  $('btnStartRender').disabled = true;
+  const [w,h] = $('resolution').value.split('x').map(Number);
+  const fps = parseInt($('fps').value);
+  const transition = $('transition').value;
   const captionStyle = $('captionStyle').value;
-  const captionColor = $('captionColor').value;
-  const captionSize = parseInt($('captionSize').value) || 48;
-  const watermark = $('addWatermark').checked ? $('watermarkText').value : '';
+  const filter = $('filter').value;
+  const volume = $('audioVolume').value/100;
 
-  // load all videos
-  const videos = [];
-  for(const sv of STATE.selectedVideos){
-    const v = await loadVideo(sv.file.link);
-    videos.push(v);
+  const canvas = $('renderCanvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+
+  $('infoRes').textContent = `${w}x${h}`;
+  $('infoDur').textContent = state.audioDuration.toFixed(1)+'s';
+  $('infoFps').textContent = fps;
+  $('infoClip').textContent = state.selectedVideos.length;
+  $('infoEta').textContent = Math.ceil(state.audioDuration*1.5)+'s';
+
+  // Setup audio context
+  const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  const audioEl = $('audioPlayer');
+  audioEl.currentTime = 0;
+  const source = audioCtx.createMediaElementSource(audioEl);
+  const gain = audioCtx.createGain();
+  gain.gain.value = volume;
+  const dest = audioCtx.createMediaStreamDestination();
+  source.connect(gain);
+  gain.connect(dest);
+  gain.connect(audioCtx.destination);
+
+  // MediaRecorder
+  const canvasStream = canvas.captureStream(fps);
+  dest.stream.getAudioTracks().forEach(t=>canvasStream.addTrack(t));
+  
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') ? 'video/webm;codecs=vp9,opus' : 'video/webm';
+  const recorder = new MediaRecorder(canvasStream,{mimeType, videoBitsPerSecond: 5_000_000});
+  const chunks = [];
+  recorder.ondataavailable = e => e.data.size>0 && chunks.push(e.data);
+  
+  const donePromise = new Promise(res => recorder.onstop = res);
+  recorder.start();
+
+  // Load video clips
+  $('renderStatusText').textContent = 'Memuat video clips...';
+  const clips = [];
+  for(const v of state.selectedVideos){
+    const file = v.video_files.find(f=>f.quality==='hd' || f.quality==='sd') || v.video_files[0];
+    const el = document.createElement('video');
+    el.src = file.link;
+    el.muted = true;
+    el.crossOrigin = 'anonymous';
+    await new Promise(r=>{ el.onloadeddata=r; el.onerror=()=>r(); });
+    clips.push({el, duration: v.duration});
   }
 
-  // audio
-  let audioEl = null;
-  if(STATE.audioFile){
-    audioEl = new Audio(URL.createObjectURL(STATE.audioFile));
-    audioEl.crossOrigin = 'anonymous';
-  }
+  // Build caption timeline (simple: split transcript by duration)
+  const words = state.transcript.split(/\s+/).filter(Boolean);
+  const wordDur = state.audioDuration / Math.max(words.length,1);
+  const captions = words.map((w,i)=>({text:w, start:i*wordDur, end:(i+1)*wordDur}));
 
-  const totalDur = videos.length * clipDur;
+  // Play audio
+  audioEl.play();
   const startTime = performance.now();
-  previewState = { videos, audioEl, startTime, totalDur, running:true };
+  const totalDur = state.audioDuration * 1000;
+  const clipDur = totalDur / clips.length;
 
-  if(audioEl){ audioEl.currentTime = 0; audioEl.play().catch(()=>{}); }
+  $('renderStatusText').textContent = 'Rendering...';
 
-  function frame(){
-    if(!previewState || !previewState.running) return;
-    const elapsed = (performance.now() - startTime)/1000;
-    if(elapsed >= totalDur){
-      stopPreview();
-      return;
-    }
-    const clipIdx = Math.min(Math.floor(elapsed/clipDur), videos.length-1);
-    const clipLocal = elapsed - clipIdx*clipDur;
-    const clipProgress = clipLocal/clipDur;
+  // Animation loop
+  function drawFrame(){
+    const elapsed = performance.now() - startTime;
+    const progress = Math.min(elapsed/totalDur, 1);
+    $('renderProgress').value = progress*100;
+    $('renderPercent').textContent = Math.floor(progress*100)+'%';
 
-    // draw video
-    const v = videos[clipIdx];
-    drawVideoFit(ctx, v, res.w, res.h);
+    const clipIdx = Math.min(Math.floor(elapsed/clipDur), clips.length-1);
+    const clipElapsed = elapsed - clipIdx*clipDur;
+    const clip = clips[clipIdx];
+    const videoTime = (clipElapsed/1000) % clip.duration;
+    clip.el.currentTime = videoTime;
 
-    // transition
-    if(transType !== 'none'){
-      const transDur = 0.6;
-      if(clipLocal < transDur && clipIdx > 0){
-        const tProg = clipLocal/transDur;
-        applyTransition(ctx, transType, tProg, res.w, res.h);
+    // Draw video with cover fit
+    const vw = clip.el.videoWidth || w;
+    const vh = clip.el.videoHeight || h;
+    const scale = Math.max(w/vw, h/vh);
+    const dw = vw*scale, dh = vh*scale;
+    const dx = (w-dw)/2, dy = (h-dh)/2;
+
+    // Apply filter
+    ctx.filter = getFilterCSS(filter);
+    ctx.drawImage(clip.el, dx, dy, dw, dh);
+    ctx.filter = 'none';
+
+    // Transition fade
+    if(transition==='fade'){
+      const fadeDur = 500;
+      if(clipElapsed < fadeDur){
+        ctx.fillStyle = `rgba(0,0,0,${1-clipElapsed/fadeDur})`;
+        ctx.fillRect(0,0,w,h);
+      } else if(clipDur-clipElapsed < fadeDur){
+        ctx.fillStyle = `rgba(0,0,0,${1-(clipDur-clipElapsed)/fadeDur})`;
+        ctx.fillRect(0,0,w,h);
       }
     }
 
-    // caption
-    if(captionStyle !== 'none' && STATE.transcript){
-      drawCaption(ctx, elapsed, res.w, res.h, captionStyle, captionColor, captionSize);
+    // Caption
+    if(captionStyle!=='none'){
+      const cur = elapsed/1000;
+      const active = captions.find(c=>cur>=c.start && cur<c.end);
+      if(active){
+        drawCaption(ctx, active.text, w, h, captionStyle);
+      }
     }
 
-    // watermark
-    if(watermark){
-      ctx.fillStyle = 'rgba(255,255,255,.6)';
-      ctx.font = `bold ${Math.floor(res.h*0.025)}px sans-serif`;
-      ctx.textAlign = 'right';
-      ctx.fillText(watermark, res.w-20, res.h-20);
+    if(progress<1) requestAnimationFrame(drawFrame);
+    else {
+      recorder.stop();
+      audioEl.pause();
+      donePromise.then(()=>{
+        state.renderedBlob = new Blob(chunks,{type:mimeType});
+        $('finalVideo').src = URL.createObjectURL(state.renderedBlob);
+        $('renderStatusText').textContent = '✅ Render selesai!';
+        $('btnStep6Next').disabled = false;
+        $('btnStartRender').disabled = false;
+        showSuccess('Video berhasil dirender!');
+      });
     }
-
-    $('previewTime').textContent = `${fmtTime(elapsed)} / ${fmtTime(totalDur)}`;
-    previewState.raf = requestAnimationFrame(frame);
   }
-  previewState.raf = requestAnimationFrame(frame);
-  toast('▶️ Preview dimulai', 'info', 1500);
-};
-
-$('btnStopPreview').onclick = stopPreview;
-function stopPreview(){
-  if(previewState){
-    previewState.running = false;
-    if(previewState.raf) cancelAnimationFrame(previewState.raf);
-    if(previewState.audioEl){ previewState.audioEl.pause(); previewState.audioEl = null; }
-    previewState = null;
-  }
+  requestAnimationFrame(drawFrame);
 }
 
-function loadVideo(url){
-  return new Promise((res,rej)=>{
-    const v = document.createElement('video');
-    v.src = url;
-    v.crossOrigin = 'anonymous';
-    v.muted = true;
-    v.playsInline = true;
-    v.onloadeddata = () => res(v);
-    v.onerror = () => rej(new Error('Gagal load video'));
-    v.load();
-  });
+function getFilterCSS(f){
+  return {
+    none:'none',
+    warm:'sepia(0.3) saturate(1.3) brightness(1.05)',
+    cool:'saturate(0.8) hue-rotate(15deg) brightness(1.05)',
+    vintage:'sepia(0.5) contrast(1.1) brightness(0.95)',
+    cinematic:'contrast(1.2) saturate(0.9) brightness(0.9)'
+  }[f] || 'none';
 }
 
-function drawVideoFit(ctx, video, W, H){
-  const vw = video.videoWidth, vh = video.videoHeight;
-  if(!vw || !vh){ ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H); return; }
-  const scale = Math.max(W/vw, H/vh);
-  const dw = vw*scale, dh = vh*scale;
-  const dx = (W-dw)/2, dy = (H-dh)/2;
-  ctx.drawImage(video, dx, dy, dw, dh);
-}
-
-function applyTransition(ctx, type, t, W, H){
-  // t: 0->1, efek transisi (fade in)
-  if(type==='fade'){
-    ctx.fillStyle = `rgba(0,0,0,${1-t})`;
-    ctx.fillRect(0,0,W,H);
-  } else if(type==='slide'){
-    ctx.save();
-    ctx.translate(-W*(1-t), 0);
-    ctx.restore();
-    ctx.fillStyle = `rgba(0,0,0,${(1-t)*0.3})`;
-    ctx.fillRect(0,0,W,H);
-  } else if(type==='zoom'){
-    const s = 1 + (1-t)*0.3;
-    ctx.save();
-    ctx.translate(W/2, H/2);
-    ctx.scale(s,s);
-    ctx.translate(-W/2, -H/2);
-    ctx.globalAlpha = t;
-    ctx.restore();
-    ctx.globalAlpha = 1;
-  } else if(type==='flash'){
-    ctx.fillStyle = `rgba(255,255,255,${1-t})`;
-    ctx.fillRect(0,0,W,H);
-  }
-}
-
-function drawCaption(ctx, currentTime, W, H, style, color, size){
-  // cari segmen yang aktif
-  const segs = STATE.transcriptSegments;
-  let text = '';
-  if(segs && segs.length){
-    const s = segs.find(s => currentTime >= s.start && currentTime <= s.end);
-    if(s) text = s.text;
-  } else {
-    // fallback: bagi transcript rata
-    const totalDur = STATE.selectedVideos.length * parseFloat($('clipDuration').value);
-    const words = STATE.transcript.split(/\s+/);
-    const wordsPerSec = words.length / totalDur;
-    const wordsVisible = Math.min(words.length, Math.floor(currentTime * wordsPerSec) + 8);
-    text = words.slice(Math.max(0, wordsVisible-8), wordsVisible).join(' ');
-  }
-  if(!text) return;
-
-  const fontSize = Math.floor(size * (W/1080));
-  ctx.font = `bold ${fontSize}px 'Inter', sans-serif`;
+function drawCaption(ctx, text, w, h, style){
+  const fontSize = Math.floor(w/20);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const y = H * 0.85;
-  const pad = fontSize*0.5;
-  const lines = wrapText(ctx, text, W*0.85);
-  const lineHeight = fontSize*1.2;
-  const totalH = lines.length * lineHeight;
-
-  if(style==='modern'){
-    const grad = ctx.createLinearGradient(0, y-totalH/2-pad, 0, y+totalH/2+pad);
-    grad.addColorStop(0, 'rgba(99,102,241,.85)');
-    grad.addColorStop(1, 'rgba(139,92,246,.85)');
-    const metrics = lines.map(l=>ctx.measureText(l).width);
-    const maxW = Math.max(...metrics) + pad*2;
-    roundRect(ctx, W/2-maxW/2, y-totalH/2-pad/2, maxW, totalH+pad, 16);
-    ctx.fillStyle = grad;
-    ctx.fill();
-  } else if(style==='classic'){
-    const metrics = lines.map(l=>ctx.measureText(l).width);
-    const maxW = Math.max(...metrics) + pad*2;
-    roundRect(ctx, W/2-maxW/2, y-totalH/2-pad/2, maxW, totalH+pad, 8);
-    ctx.fillStyle = 'rgba(0,0,0,.7)';
-    ctx.fill();
-  } else if(style==='bold'){
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = fontSize*0.15;
-    ctx.lineJoin = 'round';
+  ctx.font = `900 ${fontSize}px Inter, sans-serif`;
+  const x = w/2, y = h*0.85;
+  const upper = text.toUpperCase();
+  
+  if(style==='bold-white'){
+    ctx.strokeStyle = 'black'; ctx.lineWidth = fontSize/4;
+    ctx.strokeText(upper, x, y);
+    ctx.fillStyle = 'white';
+    ctx.fillText(upper, x, y);
+  } else if(style==='yellow'){
+    ctx.strokeStyle = 'black'; ctx.lineWidth = fontSize/4;
+    ctx.strokeText(upper, x, y);
+    ctx.fillStyle = '#fde047';
+    ctx.fillText(upper, x, y);
+  } else if(style==='neon'){
+    ctx.shadowColor = '#a855f7'; ctx.shadowBlur = 20;
+    ctx.fillStyle = 'white';
+    ctx.fillText(upper, x, y);
+    ctx.shadowBlur = 0;
+  } else if(style==='minimal'){
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    const m = ctx.measureText(upper);
+    ctx.fillRect(x-m.width/2-10, y-fontSize/2-5, m.width+20, fontSize+10);
+    ctx.fillStyle = 'white';
+    ctx.fillText(upper, x, y);
   }
-
-  ctx.fillStyle = color;
-  lines.forEach((line,i)=>{
-    const ly = y - totalH/2 + lineHeight/2 + i*lineHeight;
-    if(style==='bold'){
-      ctx.strokeText(line, W/2, ly);
-    }
-    ctx.fillText(line, W/2, ly);
-  });
 }
 
-function wrapText(ctx, text, maxW){
-  const words = text.split(' ');
-  const lines = [];
-  let cur = '';
-  for(const w of words){
-    const test = cur ? cur+' '+w : w;
-    if(ctx.measureText(test).width > maxW && cur){
-      lines.push(cur);
-      cur = w;
-    } else cur = test;
-  }
-  if(cur) lines.push(cur);
-  return lines;
-}
-
-function roundRect(ctx, x, y, w, h, r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
-}
-
-/* ---------------- RENDER & EXPORT ---------------- */
-$('btnRender').onclick = async () => {
-  if(STATE.isRendering){ toast('Sedang rendering...','warn'); return; }
-  if(STATE.selectedVideos.length===0){ toast('Pilih video dulu!','error'); return; }
-
-  STATE.isRendering = true;
-  $('btnRender').disabled = true;
-  $('renderProgress').classList.remove('hidden');
-  $('downloadBox').classList.add('hidden');
-
+/* =========================================================
+   SEO GENERATION
+========================================================= */
+async function generateSEO(){
+  $('btnGenerateSEO').disabled = true;
+  $('btnGenerateSEO').innerHTML = '<span class="spinner"></span> Generating...';
   try{
-    await renderVideo();
+    const prompt = `Buat konten SEO untuk video dengan transkrip: "${state.transcript.substring(0,800)}"
+Tema: ${state.themes.join(', ')}
+
+Kembalikan JSON:
+{
+  "titles": [5 judul viral dengan HOOK kuat, max 60 char, pakai emoji],
+  "description": "Deskripsi SEO 150-200 kata, hook di awal, CTA di akhir",
+  "hashtags": [15 hashtag trending relevan]
+}
+HANYA JSON, tanpa markdown.`;
+
+    const res = await callLLM(prompt);
+    const cleaned = res.replace(/```json|```/g,'').trim();
+    const data = JSON.parse(cleaned);
+
+    state.seo = data;
+    $('titleList').innerHTML = data.titles.map((t,i)=>`
+      <div class="flex items-center gap-2 bg-slate-800 p-3 rounded-lg">
+        <span class="text-indigo-400 font-bold">${i+1}.</span>
+        <span class="flex-1">${t}</span>
+        <button onclick="copyText('${t.replace(/'/g,"\\'")}')" class="text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded">📋</button>
+      </div>
+    `).join('');
+    $('descText').value = data.description;
+    $('hashtagList').innerHTML = data.hashtags.map(h=>`<span class="tag">${h.startsWith('#')?h:'#'+h}</span>`).join('');
+    $('seoResult').classList.remove('hidden');
+    showSuccess('SEO berhasil di-generate!');
   }catch(e){
-    console.error(e);
-    toast('❌ Render gagal: '+e.message, 'error');
-    $('renderStatus').textContent = '❌ Gagal: '+e.message;
+    showError('Gagal generate SEO: '+e.message);
   }finally{
-    STATE.isRendering = false;
-    $('btnRender').disabled = false;
+    $('btnGenerateSEO').disabled = false;
+    $('btnGenerateSEO').innerHTML = '✨ Generate dengan AI';
   }
-};
-
-async function renderVideo(){
-  const canvas = $('previewCanvas');
-  const ctx = canvas.getContext('2d');
-  const res = getResolution();
-  canvas.width = res.w;
-  canvas.height = res.h;
-  $('previewWrapper').style.aspectRatio = res.ratio;
-
-  const clipDur = parseFloat($('clipDuration').value) || 5;
-  const transType = $('transitionType').value;
-  const captionStyle = $('captionStyle').value;
-  const captionColor = $('captionColor').value;
-  const captionSize = parseInt($('captionSize').value) || 48;
-  const watermark = $('addWatermark').checked ? $('watermarkText').value : '';
-
-  // load videos
-  $('renderStatus').textContent = 'Memuat video...';
-  const videos = [];
-  for(let i=0;i<STATE.selectedVideos.length;i++){
-    $('renderStatus').textContent = `Memuat video ${i+1}/${STATE.selectedVideos.length}...`;
-    $('renderPercent').textContent = Math.floor((i/STATE.selectedVideos.length)*20)+'%';
-    $('renderBar').style.width = (i/STATE.selectedVideos.length)*20+'%';
-    const v = await loadVideo(STATE.selectedVideos[i].file.link);
-    videos.push(v);
-  }
-
-  // setup audio
-  let audioCtx = null, audioSource = null, audioDest = null;
-  let audioEl = null;
-  if(STATE.audioFile){
-    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-    audioDest = audioCtx.createMediaStreamDestination();
-    audioEl = new Audio(URL.createObjectURL(STATE.audioFile));
-    audioEl.crossOrigin = 'anonymous';
-    try{
-      audioSource = audioCtx.createMediaElementSource(audioEl);
-      audioSource.connect(audioDest);
-      audioSource.connect(audioCtx.destination); // juga play di speaker (optional)
-    }catch(e){
-      // fallback: tanpa audio mix
-      console.warn('Audio mix gagal:', e);
-      audioSource = null;
-    }
-  }
-
-  // canvas stream
-  const canvasStream = canvas.captureStream(30);
-  const tracks = canvasStream.getVideoTracks();
-  if(audioDest){
-    audioDest.stream.getAudioTracks().forEach(t => tracks.push(t));
-  }
-  const finalStream = new MediaStream(tracks);
-
-  // pick mime
-  const mimeCandidates = ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
-  let mime = mimeCandidates.find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
-  const recorder = new MediaRecorder(finalStream, { mimeType: mime, videoBitsPerSecond: 5_000_000 });
-  const chunks = [];
-  recorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
-
-  const totalDur = videos.length * clipDur;
-  const startTime = performance.now();
-
-  recorder.start(100);
-  if(audioEl){ audioEl.currentTime = 0; try{ await audioEl.play(); }catch(e){} }
-
-  return new Promise((resolve,rej)=>{
-    recorder.onstop = () => {
-      const blob = new Blob(chunks, {type: mime});
-      const url = URL.createObjectURL(blob);
-      $('downloadLink').href = url;
-      $('downloadBox').classList.remove('hidden');
-      $('renderStatus').textContent = '✅ Render selesai!';
-      $('renderPercent').textContent = '100%';
-      $('renderBar').style.width = '100%';
-      toast('✅ Video berhasil di-render!', 'success');
-      resolve();
-    };
-
-    function frame(){
-      const elapsed = (performance.now() - startTime)/1000;
-      const pct = Math.min(100, 20 + (elapsed/totalDur)*80);
-      $('renderBar').style.width = pct+'%';
-      $('renderPercent').textContent = Math.floor(pct)+'%';
-      $('renderStatus').textContent = `Rendering... ${fmtTime(elapsed)} / ${fmtTime(totalDur)}`;
-
-      if(elapsed >= totalDur){
-        recorder.stop();
-        finalStream.getTracks().forEach(t=>t.stop());
-        if(audioEl) audioEl.pause();
-        if(audioCtx) audioCtx.close().catch(()=>{});
-        return;
-      }
-
-      const clipIdx = Math.min(Math.floor(elapsed/clipDur), videos.length-1);
-      const clipLocal = elapsed - clipIdx*clipDur;
-
-      drawVideoFit(ctx, videos[clipIdx], res.w, res.h);
-      if(transType !== 'none'){
-        const transDur = 0.6;
-        if(clipLocal < transDur && clipIdx > 0){
-          applyTransition(ctx, transType, clipLocal/transDur, res.w, res.h);
-        }
-      }
-      if(captionStyle !== 'none' && STATE.transcript){
-        drawCaption(ctx, elapsed, res.w, res.h, captionStyle, captionColor, captionSize);
-      }
-      if(watermark){
-        ctx.fillStyle = 'rgba(255,255,255,.6)';
-        ctx.font = `bold ${Math.floor(res.h*0.025)}px sans-serif`;
-        ctx.textAlign = 'right';
-        ctx.fillText(watermark, res.w-20, res.h-20);
-      }
-
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  });
 }
 
-/* ---------------- SEO GENERATION ---------------- */
-$('btnGenerateSEO').onclick = async () => {
-  if(STATE.settings.aiProvider === 'none'){
-    toast('AI dinonaktifkan. Aktifkan di Settings.','warn');
-    return;
-  }
-  const transcript = $('transcriptText').value.trim() || STATE.transcript;
-  if(!transcript){ toast('Transkrip kosong!','error'); return; }
-  const platform = $('seoPlatform').value;
-  const tone = $('seoTone').value;
-  const status = $('seoStatus');
-  status.innerHTML = '<span class="loader"></span> <span class="text-blue-400">Generating SEO content...</span>';
-
-  try{
-    let result;
-    if(STATE.settings.aiProvider === 'groq'){
-      result = await generateSEOWithGroq(transcript, platform, tone);
-    } else {
-      result = await generateSEOWithGemini(transcript, platform, tone);
-    }
-    renderSEO(result);
-    status.innerHTML = '<span class="text-green-400">✅ SEO content berhasil di-generate!</span>';
-    $('seoResults').classList.remove('hidden');
-    goToStep(5);
-  }catch(e){
-    status.innerHTML = `<span class="text-red-400">❌ ${e.message}</span>`;
-    toast('❌ SEO gagal: '+e.message, 'error');
-  }
-};
-
-async function generateSEOWithGroq(transcript, platform, tone){
-  const prompt = `Kamu adalah ahli SEO & content creator viral. Berdasarkan transkrip video berikut, buatkan konten SEO untuk platform ${platform} dengan tone ${tone}.
-
-Transkrip:
-"""
-${transcript.slice(0,2000)}
-"""
-
-Kembalikan HANYA JSON valid dengan format:
-{
-  "titles": ["judul 1 (maks 70 char, hook kuat)", "judul 2", "judul 3"],
-  "description": "deskripsi SEO lengkap dengan hook di awal, CTA, dan kata kunci natural (300-500 kata)",
-  "hashtags": ["#tag1","#tag2","#tag3", ... 15-20 hashtag relevan + trending]
+function copyText(t){ navigator.clipboard.writeText(t); showSuccess('Tersalin!'); }
+function copyHashtags(){ 
+  navigator.clipboard.writeText(state.seo.hashtags.map(h=>h.startsWith('#')?h:'#'+h).join(' ')); 
+  showSuccess('Hashtag tersalin!'); 
 }
 
-Rules:
-- Judul harus mengandung hook, curiosity, atau emotional trigger
-- Deskripsi: 2 kalimat pertama harus hook kuat, lalu isi, lalu CTA
-- Hashtag: campur antara niche-specific dan trending
-- Gunakan Bahasa Indonesia yang natural`;
-
-  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method:'POST',
-    headers:{
-      'Authorization':`Bearer ${STATE.settings.groqKey}`,
-      'Content-Type':'application/json'
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages: [{role:'user', content: prompt}],
-      response_format: { type: 'json_object' },
-      temperature: 0.8
-    })
-  });
-  if(!r.ok){ const e = await r.text(); throw new Error(e.slice(0,200)); }
-  const data = await r.json();
-  const txt = data.choices[0].message.content;
-  return JSON.parse(txt);
+/* =========================================================
+   DOWNLOAD
+========================================================= */
+function downloadVideo(){
+  if(!state.renderedBlob){ showError('Render dulu'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(state.renderedBlob);
+  a.download = `ai-video-${Date.now()}.webm`;
+  a.click();
+  showSuccess('Download dimulai!');
 }
 
-async function generateSEOWithGemini(transcript, platform, tone){
-  const prompt = `Kamu adalah ahli SEO & content creator viral. Berdasarkan transkrip video berikut, buatkan konten SEO untuk platform ${platform} dengan tone ${tone}.
-
-Transkrip:
-"""
-${transcript.slice(0,2000)}
-"""
-
-Kembalikan HANYA JSON valid dengan format:
-{
-  "titles": ["judul 1", "judul 2", "judul 3"],
-  "description": "deskripsi SEO 300-500 kata",
-  "hashtags": ["#tag1","#tag2", ... 15-20 tag]
-}`;
-
-  const body = {
-    contents: [{parts:[{text:prompt}]}],
-    generationConfig: { responseMimeType: 'application/json', temperature: 0.8 }
-  };
-  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.settings.geminiKey}`, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(body)
-  });
-  if(!r.ok){ const e = await r.text(); throw new Error(e.slice(0,200)); }
-  const data = await r.json();
-  const txt = data.candidates[0].content.parts[0].text;
-  return JSON.parse(txt);
-}
-
-function renderSEO(data){
-  const titlesBox = $('seoTitles');
-  titlesBox.innerHTML = '';
-  (data.titles||[]).forEach((t,i)=>{
-    const div = document.createElement('div');
-    div.className = 'flex gap-2 items-center bg-slate-800/50 p-3 rounded-lg';
-    div.innerHTML = `
-      <span class="text-indigo-400 font-bold">${i+1}.</span>
-      <input type="text" value="${escapeHtml(t)}" class="flex-1" />
-      <button class="btn copy-btn bg-slate-600 hover:bg-slate-500 px-3 py-1 rounded text-sm" data-copy-input="${i}">📋</button>
+/* Final meta */
+const origGoStep2 = goStep;
+goStep = function(n){
+  origGoStep2(n);
+  if(n===8){
+    $('finalMeta').innerHTML = `
+      <div>Resolusi: ${$('resolution').value}</div>
+      <div>Durasi: ${state.audioDuration.toFixed(1)}s</div>
+      <div>Ukuran: ${(state.renderedBlob.size/1024/1024).toFixed(2)} MB</div>
+      <div>Format: WebM (bisa convert ke MP4 online)</div>
     `;
-    titlesBox.appendChild(div);
-  });
-  $('seoDescription').value = data.description || '';
-  $('seoHashtags').value = (data.hashtags||[]).join(' ');
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-/* ---------------- COPY BUTTONS ---------------- */
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.copy-btn');
-  if(!btn) return;
-  let text = '';
-  if(btn.dataset.copy){
-    text = $(btn.dataset.copy).value;
-  } else if(btn.dataset.copyInput){
-    const inputs = $('seoTitles').querySelectorAll('input');
-    text = inputs[btn.dataset.copyInput]?.value || '';
   }
-  if(text){
-    navigator.clipboard.writeText(text).then(()=>{
-      toast('📋 Tersalin!','success',1500);
-    }).catch(()=>{
-      toast('❌ Gagal copy','error');
-    });
-  }
-});
-
-/* ---------------- RESET ---------------- */
-$('btnReset').onclick = () => {
-  if(!confirm('Reset semua data? API key akan tetap tersimpan.')) return;
-  STATE.audioFile = null;
-  STATE.transcript = '';
-  STATE.transcriptSegments = [];
-  STATE.videos = [];
-  STATE.selectedVideos = [];
-  $('audioFile').value = '';
-  $('audioPlayer').classList.add('hidden');
-  $('transcriptBox').classList.add('hidden');
-  $('videoGrid').innerHTML = '';
-  $('btnTranscribe').disabled = true;
-  $('btnToStep3').disabled = true;
-  $('downloadBox').classList.add('hidden');
-  $('seoResults').classList.add('hidden');
-  goToStep(1);
-  toast('🔄 Reset selesai','info');
 };
 
-/* ---------------- INIT ---------------- */
-function init(){
-  loadSettings();
-  if(!STATE.settings.pexelsKey){
-    setTimeout(()=>{
-      toast('⚙️ Silakan atur API Key di Settings untuk memulai!', 'warn', 6000);
-      $('settingsModal').classList.remove('hidden');
-    }, 500);
-  }
-  goToStep(1);
+/* =========================================================
+   RESET
+========================================================= */
+function resetApp(){
+  if(!confirm('Mulai dari awal?')) return;
+  location.reload();
 }
-init();
+
+/* Drag & drop */
+document.addEventListener('DOMContentLoaded',()=>{
+  const drop = document.querySelector('label[for="audioFile"]').parentElement;
+  ['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{
+    e.preventDefault(); drop.classList.add('border-indigo-500');
+  }));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{
+    e.preventDefault(); drop.classList.remove('border-indigo-500');
+  }));
+  drop.addEventListener('drop',e=>{
+    e.preventDefault();
+    const f = e.dataTransfer.files[0];
+    if(f){
+      const dt = new DataTransfer(); dt.items.add(f);
+      $('audioFile').files = dt.files;
+      handleAudioUpload({target:{files:[f]}});
+    }
+  });
+});
 </script>
 </body>
 </html>
