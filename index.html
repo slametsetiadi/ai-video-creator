@@ -1,112 +1,75 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Video Creator Pro - Auto Video Maker from Audio</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ðŸŽ¬ AI Video Creator Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/index.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 <style>
-  * { font-family: 'Inter', sans-serif; }
+  * { -webkit-tap-highlight-color: transparent; }
   body {
     background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
     min-height: 100vh;
+    font-family: 'Inter', system-ui, sans-serif;
     color: #fff;
   }
   .glass {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255,255,255,0.05);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255,255,255,0.1);
   }
-  .glass-dark {
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-  .gradient-btn {
+  .btn-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    transition: all 0.3s ease;
+    transition: all 0.3s;
   }
-  .gradient-btn:hover:not(:disabled) {
+  .btn-primary:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 10px 25px rgba(102,126,234,0.4);
   }
-  .gradient-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary {
+    background: rgba(255,255,255,0.1);
+    transition: all 0.3s;
   }
-  .success-btn {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  }
-  .danger-btn {
-    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-  }
-  .warning-btn {
-    background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
-    color: #000;
-  }
-  .step-active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
-  }
-  .step-done {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    color: white;
-  }
-  .step-pending {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.5);
-  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.2); }
   .input-field {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
     transition: all 0.3s;
   }
   .input-field:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.2);
+  }
+  .step-indicator { transition: all 0.3s; }
+  .step-active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    transform: scale(1.1);
+  }
+  .step-done {
+    background: #10b981;
+    color: #fff;
   }
   .video-card {
     transition: all 0.3s;
     cursor: pointer;
+    border: 2px solid transparent;
   }
   .video-card:hover {
-    transform: scale(1.03);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
   }
   .video-card.selected {
-    border: 3px solid #38ef7d;
-    box-shadow: 0 0 20px rgba(56, 239, 125, 0.5);
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.3);
   }
-  .pulse-dot {
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-  .fade-in {
-    animation: fadeIn 0.5s ease-in;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .progress-bar {
-    background: linear-gradient(90deg, #667eea, #764ba2, #38ef7d);
-    background-size: 200% 100%;
-    animation: gradient 2s ease infinite;
-  }
-  @keyframes gradient {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
-  .spinner {
-    border: 3px solid rgba(255, 255, 255, 0.1);
+  .loader {
+    border: 3px solid rgba(255,255,255,0.1);
     border-top: 3px solid #667eea;
     border-radius: 50%;
     width: 40px;
@@ -117,1772 +80,1539 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
-  .scrollbar-custom::-webkit-scrollbar { width: 8px; height: 8px; }
-  .scrollbar-custom::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-  .scrollbar-custom::-webkit-scrollbar-thumb { background: rgba(102, 126, 234, 0.5); border-radius: 4px; }
-  .waveform-bar {
-    background: linear-gradient(180deg, #667eea, #764ba2);
-    animation: wave 1s ease-in-out infinite;
+  .fade-in { animation: fadeIn 0.5s ease-in; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  @keyframes wave {
-    0%, 100% { transform: scaleY(0.3); }
-    50% { transform: scaleY(1); }
+  .pulse-dot {
+    animation: pulse 2s infinite;
   }
-  .caption-preview {
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8), -2px -2px 4px rgba(0,0,0,0.8);
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
-  .glow-text {
-    text-shadow: 0 0 10px rgba(102, 126, 234, 0.8);
+  .scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+  .scrollbar::-webkit-scrollbar-thumb { background: rgba(102,126,234,0.5); border-radius: 4px; }
+  .tag-chip {
+    background: rgba(102,126,234,0.2);
+    border: 1px solid rgba(102,126,234,0.4);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: inline-block;
+    margin: 2px;
   }
-  .tab-active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    z-index: 9999;
+    animation: slideIn 0.3s ease-out;
+    max-width: 400px;
   }
-  .tab-inactive {
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.6);
+  @keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
   }
-  .resolution-card {
-    transition: all 0.3s;
-    cursor: pointer;
+  .toast-success { background: #10b981; }
+  .toast-error { background: #ef4444; }
+  .toast-info { background: #3b82f6; }
+  .progress-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
   }
-  .resolution-card:hover {
-    transform: translateY(-3px);
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transition: width 0.3s;
   }
-  .resolution-card.selected {
-    border: 2px solid #38ef7d;
-    background: rgba(56, 239, 125, 0.1);
+  .preview-container {
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+  .caption-overlay {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    max-width: 80%;
+    text-align: center;
+    font-size: 14px;
   }
 </style>
 </head>
-<body class="scrollbar-custom">
+<body>
 
 <!-- HEADER -->
-<header class="glass-dark sticky top-0 z-50 shadow-2xl">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl gradient-btn flex items-center justify-center text-xl font-bold">🎬</div>
-      <div>
-        <h1 class="text-xl font-bold glow-text">AI Video Creator Pro</h1>
-        <p class="text-xs text-gray-400">Auto Video Maker from Audio</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-3">
-      <div id="connectionStatus" class="flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30">
-        <div class="w-2 h-2 rounded-full bg-red-500 pulse-dot"></div>
-        <span class="text-xs">Offline</span>
-      </div>
-      <button onclick="showHelp()" class="p-2 rounded-lg hover:bg-white/10 transition" title="Bantuan">❓</button>
-    </div>
+<div class="max-w-6xl mx-auto p-4 md:p-6">
+  <header class="text-center mb-6 fade-in">
+    <h1 class="text-3xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+      ðŸŽ¬ AI Video Creator Pro
+    </h1>
+    <p class="text-gray-300 text-sm md:text-base">
+      Ubah suara/voice menjadi video viral siap publish dengan AI otomatis
+    </p>
+  </header>
+
+  <!-- STEP INDICATOR -->
+  <div class="flex items-center justify-center mb-8 gap-1 md:gap-2 flex-wrap" id="stepIndicator">
+    <div class="step-indicator step-active w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-xs md:text-sm" data-step="1">1</div>
+    <div class="h-0.5 w-4 md:w-8 bg-white/20"></div>
+    <div class="step-indicator w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs md:text-sm" data-step="2">2</div>
+    <div class="h-0.5 w-4 md:w-8 bg-white/20"></div>
+    <div class="step-indicator w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs md:text-sm" data-step="3">3</div>
+    <div class="h-0.5 w-4 md:w-8 bg-white/20"></div>
+    <div class="step-indicator w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs md:text-sm" data-step="4">4</div>
+    <div class="h-0.5 w-4 md:w-8 bg-white/20"></div>
+    <div class="step-indicator w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs md:text-sm" data-step="5">5</div>
+    <div class="h-0.5 w-4 md:w-8 bg-white/20"></div>
+    <div class="step-indicator w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs md:text-sm" data-step="6">6</div>
+    <div class="h-0.5 w-4 md:w-8 bg-white/20"></div>
+    <div class="step-indicator w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs md:text-sm" data-step="7">7</div>
   </div>
-</header>
 
-<!-- PROGRESS BAR -->
-<div class="max-w-7xl mx-auto px-4 py-4">
-  <div class="flex items-center justify-between mb-2">
-    <span class="text-sm text-gray-400">Progress</span>
-    <span id="progressText" class="text-sm font-semibold">Step 1 dari 7</span>
-  </div>
-  <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-    <div id="mainProgress" class="h-full progress-bar transition-all duration-500" style="width: 14%"></div>
-  </div>
-  <div class="flex justify-between mt-4 overflow-x-auto scrollbar-custom pb-2">
-    <div class="flex flex-col items-center min-w-[80px]">
-      <div id="step1" class="w-10 h-10 rounded-full flex items-center justify-center font-bold step-active">1</div>
-      <span class="text-xs mt-1 text-center">API Setup</span>
-    </div>
-    <div class="flex flex-col items-center min-w-[80px]">
-      <div id="step2" class="w-10 h-10 rounded-full flex items-center justify-center font-bold step-pending">2</div>
-      <span class="text-xs mt-1 text-center">Upload Audio</span>
-    </div>
-    <div class="flex flex-col items-center min-w-[80px]">
-      <div id="step3" class="w-10 h-10 rounded-full flex items-center justify-center font-bold step-pending">3</div>
-      <span class="text-xs mt-1 text-center">Transkripsi</span>
-    </div>
-    <div class="flex flex-col items-center min-w-[80px]">
-      <div id="step4" class="w-10 h-10 rounded-full flex items-center justify-center font-bold step-pending">4</div>
-      <span class="text-xs mt-1 text-center">Cari Video</span>
-    </div>
-    <div class="flex flex-col items-center min-w-[80px]">
-      <div id="step5" class="w-10 h-10 rounded-full flex items-center justify-center font-bold step-pending">5</div>
-      <span class="text-xs mt-1 text-center">Auto Edit</span>
-    </div>
-    <div class="flex flex-col items-center min-w-[80px]">
-      <div id="step6" class="w-10 h-10 rounded-full flex items-center justify-center font-bold step-pending">6</div>
-      <span class="text-xs mt-1 text-center">SEO & Hook</span>
-    </div>
-    <div class="flex flex-col items-center min-w-[80px]">
-      <div id="step7" class="w-10 h-10 rounded-full flex items-center justify-center font-bold step-pending">7</div>
-      <span class="text-xs mt-1 text-center">Download</span>
-    </div>
-  </div>
-</div>
+  <!-- MAIN CONTENT -->
+  <main class="glass rounded-2xl p-6 md:p-8 min-h-[500px]">
 
-<!-- MAIN CONTENT -->
-<main class="max-w-7xl mx-auto px-4 pb-20">
+    <!-- STEP 1: API CONFIG -->
+    <section id="step-1" class="step fade-in">
+      <h2 class="text-2xl md:text-3xl font-bold mb-2">
+        <i class="fas fa-key text-purple-400 mr-2"></i>Konfigurasi API Keys
+      </h2>
+      <p class="text-gray-400 mb-6">Masukkan API Key untuk mengaktifkan semua fitur AI (semua GRATIS)</p>
 
-  <!-- STEP 1: API SETUP -->
-  <section id="section1" class="fade-in">
-    <div class="glass rounded-2xl p-6 md:p-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center text-2xl">🔑</div>
-        <div>
-          <h2 class="text-2xl font-bold">Konfigurasi API Keys</h2>
-          <p class="text-gray-400 text-sm">Setup API untuk AI, Transkripsi, dan Pencarian Video</p>
-        </div>
-      </div>
-
-      <div class="grid md:grid-cols-2 gap-6">
-        <!-- Groq API -->
-        <div class="glass-dark rounded-xl p-5">
+      <div class="space-y-4">
+        <!-- Groq -->
+        <div class="glass rounded-xl p-4">
           <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-              <span class="text-2xl">⚡</span>
-              <h3 class="font-bold">Groq API</h3>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                <i class="fas fa-bolt text-orange-400"></i>
+              </div>
+              <div>
+                <h3 class="font-bold">Groq API</h3>
+                <p class="text-xs text-gray-400">Untuk Whisper (STT) & LLM cepat</p>
+              </div>
             </div>
-            <span id="groqStatus" class="text-xs px-2 py-1 rounded bg-gray-700">Belum Tes</span>
+            <div id="groqStatus" class="text-xs px-2 py-1 rounded-full bg-gray-700">Belum dicek</div>
           </div>
-          <p class="text-xs text-gray-400 mb-3">Untuk transkripsi audio (Whisper) & AI text generation. Gratis di console.groq.com</p>
-          <input id="groqKey" type="password" placeholder="gsk_xxxxxxxxxxxxxxx" class="input-field w-full px-4 py-2 rounded-lg mb-3">
-          <button onclick="testGroq()" class="w-full gradient-btn text-white px-4 py-2 rounded-lg font-semibold">🔍 Test Koneksi Groq</button>
-        </div>
-
-        <!-- Gemini API -->
-        <div class="glass-dark rounded-xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-              <span class="text-2xl">✨</span>
-              <h3 class="font-bold">Gemini API</h3>
-            </div>
-            <span id="geminiStatus" class="text-xs px-2 py-1 rounded bg-gray-700">Belum Tes</span>
-          </div>
-          <p class="text-xs text-gray-400 mb-3">Untuk rekomendasi SEO, judul viral, dan deskripsi. Gratis di aistudio.google.com</p>
-          <input id="geminiKey" type="password" placeholder="AIzaSyxxxxxxxxxxxxxxx" class="input-field w-full px-4 py-2 rounded-lg mb-3">
-          <button onclick="testGemini()" class="w-full gradient-btn text-white px-4 py-2 rounded-lg font-semibold">🔍 Test Koneksi Gemini</button>
-        </div>
-
-        <!-- Pexels API -->
-        <div class="glass-dark rounded-xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-              <span class="text-2xl">🎥</span>
-              <h3 class="font-bold">Pexels API</h3>
-            </div>
-            <span id="pexelsStatus" class="text-xs px-2 py-1 rounded bg-gray-700">Belum Tes</span>
-          </div>
-          <p class="text-xs text-gray-400 mb-3">Untuk pencarian video bebas copyright. Gratis di pexels.com/api</p>
-          <input id="pexelsKey" type="password" placeholder="xxxxxxxxxxxxxxxxx" class="input-field w-full px-4 py-2 rounded-lg mb-3">
-          <button onclick="testPexels()" class="w-full gradient-btn text-white px-4 py-2 rounded-lg font-semibold">🔍 Test Koneksi Pexels</button>
-        </div>
-
-        <!-- Internet Status -->
-        <div class="glass-dark rounded-xl p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-2xl">🌐</span>
-            <h3 class="font-bold">Status Internet</h3>
-          </div>
-          <p class="text-xs text-gray-400 mb-3">Pastikan koneksi internet aktif untuk menjalankan aplikasi</p>
-          <div id="internetStatusBox" class="mb-3 p-3 rounded-lg bg-gray-800/50">
-            <div class="flex items-center gap-2">
-              <div id="internetDot" class="w-3 h-3 rounded-full bg-yellow-500 pulse-dot"></div>
-              <span id="internetText" class="text-sm">Mengecek...</span>
-            </div>
-          </div>
-          <button onclick="checkInternet()" class="w-full warning-btn px-4 py-2 rounded-lg font-semibold">🔄 Cek Ulang Internet</button>
-        </div>
-      </div>
-
-      <div class="mt-6 p-4 rounded-xl bg-blue-500/10 border border-blue-500/30">
-        <h4 class="font-bold mb-2 flex items-center gap-2">💡 Tips Mendapatkan API Key Gratis:</h4>
-        <ul class="text-sm text-gray-300 space-y-1">
-          <li>• <strong>Groq:</strong> Daftar di <a href="https://console.groq.com" target="_blank" class="text-blue-400 underline">console.groq.com</a> → Create API Key</li>
-          <li>• <strong>Gemini:</strong> Daftar di <a href="https://aistudio.google.com/apikey" target="_blank" class="text-blue-400 underline">aistudio.google.com/apikey</a> → Create API Key</li>
-          <li>• <strong>Pexels:</strong> Daftar di <a href="https://www.pexels.com/api/" target="_blank" class="text-blue-400 underline">pexels.com/api</a> → Dapatkan API Key</li>
-        </ul>
-      </div>
-
-      <div class="flex justify-end mt-6">
-        <button onclick="goToStep(2)" class="gradient-btn text-white px-8 py-3 rounded-xl font-bold">Lanjut ke Step 2 →</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- STEP 2: UPLOAD AUDIO -->
-  <section id="section2" class="hidden fade-in">
-    <div class="glass rounded-2xl p-6 md:p-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center text-2xl">🎵</div>
-        <div>
-          <h2 class="text-2xl font-bold">Upload Audio / Voice</h2>
-          <p class="text-gray-400 text-sm">Upload file audio yang akan menjadi dasar video (voice over, narasi, dll)</p>
-        </div>
-      </div>
-
-      <div id="uploadArea" class="border-2 border-dashed border-white/20 rounded-2xl p-10 text-center hover:border-purple-500 transition cursor-pointer" onclick="document.getElementById('audioFile').click()">
-        <input type="file" id="audioFile" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)">
-        <div id="uploadContent">
-          <div class="text-6xl mb-4">🎤</div>
-          <h3 class="text-xl font-bold mb-2">Klik atau Drag & Drop Audio di sini</h3>
-          <p class="text-gray-400 text-sm mb-4">Format: MP3, WAV, M4A, OGG, FLAC (Max 25MB)</p>
-          <div class="inline-block gradient-btn text-white px-6 py-2 rounded-lg font-semibold">Pilih File Audio</div>
-        </div>
-        <div id="uploadedContent" class="hidden">
-          <div class="text-6xl mb-4">✅</div>
-          <h3 id="audioFileName" class="text-xl font-bold mb-2">filename.mp3</h3>
-          <p id="audioFileInfo" class="text-gray-400 text-sm mb-4">Info file</p>
-        </div>
-      </div>
-
-      <div id="audioPlayerBox" class="hidden mt-6 glass-dark rounded-xl p-4">
-        <h4 class="font-bold mb-3">🎧 Preview Audio</h4>
-        <audio id="audioPlayer" controls class="w-full"></audio>
-        <div class="mt-3 flex items-center gap-2">
-          <div class="flex-1 flex items-end gap-1 h-16" id="waveform"></div>
-        </div>
-        <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-          <div class="bg-black/30 rounded p-2">
-            <div class="text-gray-400">Durasi</div>
-            <div id="audioDuration" class="font-bold">-</div>
-          </div>
-          <div class="bg-black/30 rounded p-2">
-            <div class="text-gray-400">Ukuran</div>
-            <div id="audioSize" class="font-bold">-</div>
-          </div>
-          <div class="bg-black/30 rounded p-2">
-            <div class="text-gray-400">Format</div>
-            <div id="audioFormat" class="font-bold">-</div>
-          </div>
-          <div class="bg-black/30 rounded p-2">
-            <div class="text-gray-400">Status</div>
-            <div class="font-bold text-green-400">Siap</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-between mt-6">
-        <button onclick="goToStep(1)" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold">← Kembali</button>
-        <button id="btnToStep3" onclick="goToStep(3)" disabled class="gradient-btn text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lanjut ke Step 3 →</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- STEP 3: TRANSCRIPTION -->
-  <section id="section3" class="hidden fade-in">
-    <div class="glass rounded-2xl p-6 md:p-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center text-2xl">📝</div>
-        <div>
-          <h2 class="text-2xl font-bold">Transkripsi Audio</h2>
-          <p class="text-gray-400 text-sm">AI akan mengubah audio menjadi teks dengan timestamp untuk caption</p>
-        </div>
-      </div>
-
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="glass-dark rounded-xl p-5">
-          <h4 class="font-bold mb-3">⚙️ Pengaturan Transkripsi</h4>
-          <div class="space-y-3">
-            <div>
-              <label class="text-sm text-gray-400">Model AI</label>
-              <select id="transcriptionModel" class="input-field w-full px-4 py-2 rounded-lg mt-1">
-                <option value="whisper-large-v3-turbo">Whisper Large V3 Turbo (Cepat & Akurat)</option>
-                <option value="whisper-large-v3">Whisper Large V3 (Paling Akurat)</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-sm text-gray-400">Bahasa Audio</label>
-              <select id="audioLanguage" class="input-field w-full px-4 py-2 rounded-lg mt-1">
-                <option value="id">Indonesia</option>
-                <option value="en">English</option>
-                <option value="auto">Auto Detect</option>
-                <option value="ja">Japanese</option>
-                <option value="ko">Korean</option>
-                <option value="zh">Chinese</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-sm text-gray-400">Timestamps</label>
-              <select id="timestampType" class="input-field w-full px-4 py-2 rounded-lg mt-1">
-                <option value="segment">Per Segment (untuk caption)</option>
-                <option value="word">Per Word (lebih detail)</option>
-              </select>
-            </div>
-          </div>
-          <button id="btnTranscribe" onclick="transcribeAudio()" class="w-full gradient-btn text-white px-4 py-3 rounded-lg font-bold mt-4">🚀 Mulai Transkripsi</button>
-        </div>
-
-        <div class="glass-dark rounded-xl p-5">
-          <h4 class="font-bold mb-3">📊 Status Proses</h4>
-          <div id="transcriptionStatus" class="space-y-2">
-            <div class="flex items-center gap-2 text-sm text-gray-400">
-              <div class="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center">1</div>
-              <span>Menunggu proses...</span>
-            </div>
-          </div>
-          <div id="transcriptionProgress" class="hidden mt-4">
-            <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-              <div id="transcribeProgressBar" class="h-full progress-bar transition-all" style="width: 0%"></div>
-            </div>
-            <p id="transcribeProgressText" class="text-xs text-gray-400 mt-2">Memproses...</p>
-          </div>
-        </div>
-      </div>
-
-      <div id="transcriptionResult" class="hidden mt-6 glass-dark rounded-xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <h4 class="font-bold">📄 Hasil Transkripsi</h4>
-          <button onclick="copyTranscription()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded">📋 Copy</button>
-        </div>
-        <div id="transcriptionText" class="bg-black/30 rounded-lg p-4 max-h-60 overflow-y-auto scrollbar-custom text-sm whitespace-pre-wrap"></div>
-        <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
-          <div class="bg-black/30 rounded p-2">
-            <div class="text-gray-400">Total Kata</div>
-            <div id="wordCount" class="font-bold">0</div>
-          </div>
-          <div class="bg-black/30 rounded p-2">
-            <div class="text-gray-400">Durasi</div>
-            <div id="transcribeDuration" class="font-bold">-</div>
-          </div>
-          <div class="bg-black/30 rounded p-2">
-            <div class="text-gray-400">Segments</div>
-            <div id="segmentCount" class="font-bold">0</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-between mt-6">
-        <button onclick="goToStep(2)" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold">← Kembali</button>
-        <button id="btnToStep4" onclick="goToStep(4)" disabled class="gradient-btn text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lanjut ke Step 4 →</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- STEP 4: VIDEO SEARCH -->
-  <section id="section4" class="hidden fade-in">
-    <div class="glass rounded-2xl p-6 md:p-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center text-2xl">🔍</div>
-        <div>
-          <h2 class="text-2xl font-bold">Pencarian Video Otomatis</h2>
-          <p class="text-gray-400 text-sm">AI mencari video bebas copyright yang sesuai dengan tema audio Anda</p>
-        </div>
-      </div>
-
-      <div class="glass-dark rounded-xl p-5 mb-6">
-        <h4 class="font-bold mb-3">🎯 Keyword dari AI</h4>
-        <div id="keywordsContainer" class="flex flex-wrap gap-2 mb-3">
-          <span class="text-sm text-gray-400">Keyword akan muncul setelah AI menganalisis transkripsi...</span>
-        </div>
-        <button id="btnGenerateKeywords" onclick="generateKeywords()" class="gradient-btn text-white px-4 py-2 rounded-lg font-semibold">✨ Generate Keywords dengan AI</button>
-      </div>
-
-      <div id="videoSearchSection" class="hidden">
-        <div class="glass-dark rounded-xl p-5 mb-6">
-          <div class="flex items-center justify-between mb-3">
-            <h4 class="font-bold">🎬 Video Ditemukan</h4>
-            <div class="flex gap-2">
-              <button onclick="searchVideos()" class="bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-sm">🔄 Refresh</button>
-              <button onclick="selectAllVideos()" class="bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-sm">✅ Pilih Semua</button>
-            </div>
-          </div>
-          <div id="videoGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[500px] overflow-y-auto scrollbar-custom"></div>
-          <div class="mt-3 p-3 bg-black/30 rounded-lg">
-            <div class="flex items-center justify-between text-sm">
-              <span>Video Terpilih: <strong id="selectedCount">0</strong></span>
-              <span>Total Durasi: <strong id="totalVideoDuration">0s</strong></span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-between mt-6">
-        <button onclick="goToStep(3)" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold">← Kembali</button>
-        <button id="btnToStep5" onclick="goToStep(5)" disabled class="gradient-btn text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lanjut ke Step 5 →</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- STEP 5: AUTO EDIT -->
-  <section id="section5" class="hidden fade-in">
-    <div class="glass rounded-2xl p-6 md:p-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center text-2xl">🎞️</div>
-        <div>
-          <h2 class="text-2xl font-bold">Auto Edit Video</h2>
-          <p class="text-gray-400 text-sm">AI akan menggabungkan video, audio, caption, dan transisi secara otomatis</p>
-        </div>
-      </div>
-
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="glass-dark rounded-xl p-5">
-          <h4 class="font-bold mb-3">📐 Pilih Resolusi & Platform</h4>
-          <div class="grid grid-cols-2 gap-3 mb-4">
-            <div onclick="selectResolution('landscape')" class="resolution-card selected glass rounded-xl p-3 text-center" data-res="landscape">
-              <div class="text-3xl mb-1">🖥️</div>
-              <div class="font-bold text-sm">Landscape</div>
-              <div class="text-xs text-gray-400">1920×1080 (16:9)</div>
-              <div class="text-xs text-blue-400 mt-1">YouTube, FB</div>
-            </div>
-            <div onclick="selectResolution('portrait')" class="resolution-card glass rounded-xl p-3 text-center" data-res="portrait">
-              <div class="text-3xl mb-1">📱</div>
-              <div class="font-bold text-sm">Portrait</div>
-              <div class="text-xs text-gray-400">1080×1920 (9:16)</div>
-              <div class="text-xs text-pink-400 mt-1">TikTok, Reels, Shorts</div>
-            </div>
-            <div onclick="selectResolution('square')" class="resolution-card glass rounded-xl p-3 text-center" data-res="square">
-              <div class="text-3xl mb-1">⬜</div>
-              <div class="font-bold text-sm">Square</div>
-              <div class="text-xs text-gray-400">1080×1080 (1:1)</div>
-              <div class="text-xs text-purple-400 mt-1">Instagram, FB</div>
-            </div>
-            <div onclick="selectResolution('4k')" class="resolution-card glass rounded-xl p-3 text-center" data-res="4k">
-              <div class="text-3xl mb-1">🎬</div>
-              <div class="font-bold text-sm">4K</div>
-              <div class="text-xs text-gray-400">3840×2160</div>
-              <div class="text-xs text-yellow-400 mt-1">Premium Quality</div>
-            </div>
-          </div>
-
-          <h4 class="font-bold mb-3 mt-4">🎨 Pengaturan Edit</h4>
-          <div class="space-y-3">
-            <div>
-              <label class="text-sm text-gray-400">Transisi</label>
-              <select id="transitionType" class="input-field w-full px-4 py-2 rounded-lg mt-1">
-                <option value="fade">Fade (Halus)</option>
-                <option value="dissolve">Dissolve (Larut)</option>
-                <option value="wipeleft">Wipe Left</option>
-                <option value="wiperight">Wipe Right</option>
-                <option value="slideup">Slide Up</option>
-                <option value="none">Tanpa Transisi</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-sm text-gray-400">Durasi Transisi</label>
-              <select id="transitionDuration" class="input-field w-full px-4 py-2 rounded-lg mt-1">
-                <option value="0.3">0.3 detik (Cepat)</option>
-                <option value="0.5" selected>0.5 detik (Normal)</option>
-                <option value="1.0">1.0 detik (Lambat)</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-sm text-gray-400">Style Caption</label>
-              <select id="captionStyle" class="input-field w-full px-4 py-2 rounded-lg mt-1">
-                <option value="bottom">Bawah (Classic)</option>
-                <option value="center">Tengah (Karaoke)</option>
-                <option value="top">Atas</option>
-                <option value="word-by-word">Per Kata (Modern)</option>
-              </select>
-            </div>
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-gray-400">Auto Caption</label>
-              <input type="checkbox" id="enableCaption" checked class="w-5 h-5 accent-purple-500">
-            </div>
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-gray-400">Auto Color Grading</label>
-              <input type="checkbox" id="enableColor" checked class="w-5 h-5 accent-purple-500">
-            </div>
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-gray-400">Auto Stabilization</label>
-              <input type="checkbox" id="enableStabilize" class="w-5 h-5 accent-purple-500">
-            </div>
-          </div>
-        </div>
-
-        <div class="glass-dark rounded-xl p-5">
-          <h4 class="font-bold mb-3">🎬 Preview & Proses</h4>
-          <div id="editPreview" class="bg-black rounded-lg aspect-video flex items-center justify-center mb-3 relative overflow-hidden">
-            <div id="previewPlaceholder" class="text-center text-gray-500">
-              <div class="text-5xl mb-2">🎥</div>
-              <p class="text-sm">Preview akan muncul di sini</p>
-            </div>
-            <video id="previewVideo" class="hidden w-full h-full object-contain" controls></video>
-          </div>
-          <div id="editProgress" class="hidden">
-            <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-2">
-              <div id="editProgressBar" class="h-full progress-bar transition-all" style="width: 0%"></div>
-            </div>
-            <p id="editProgressText" class="text-xs text-gray-400">Memproses...</p>
-          </div>
-          <button id="btnStartEdit" onclick="startAutoEdit()" class="w-full gradient-btn text-white px-4 py-3 rounded-lg font-bold">🚀 Mulai Auto Edit</button>
-          <div id="editStatus" class="mt-3 text-sm text-gray-400"></div>
-        </div>
-      </div>
-
-      <div class="flex justify-between mt-6">
-        <button onclick="goToStep(4)" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold">← Kembali</button>
-        <button id="btnToStep6" onclick="goToStep(6)" disabled class="gradient-btn text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lanjut ke Step 6 →</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- STEP 6: SEO -->
-  <section id="section6" class="hidden fade-in">
-    <div class="glass rounded-2xl p-6 md:p-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center text-2xl">🚀</div>
-        <div>
-          <h2 class="text-2xl font-bold">Rekomendasi SEO & Hook</h2>
-          <p class="text-gray-400 text-sm">AI membuat judul viral dan deskripsi SEO-friendly untuk video Anda</p>
-        </div>
-      </div>
-
-      <div class="glass-dark rounded-xl p-5 mb-6">
-        <div class="flex items-center justify-between mb-3">
-          <h4 class="font-bold">✨ Generate dengan AI</h4>
-          <select id="seoPlatform" class="input-field px-3 py-1 rounded-lg text-sm">
-            <option value="youtube">YouTube</option>
-            <option value="tiktok">TikTok</option>
-            <option value="instagram">Instagram Reels</option>
-            <option value="facebook">Facebook</option>
-            <option value="shorts">YouTube Shorts</option>
-          </select>
-        </div>
-        <button id="btnGenerateSEO" onclick="generateSEO()" class="w-full gradient-btn text-white px-4 py-3 rounded-lg font-bold">🎯 Generate Judul & Deskripsi SEO</button>
-      </div>
-
-      <div id="seoResults" class="hidden space-y-4">
-        <div class="glass-dark rounded-xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <h4 class="font-bold">📌 Judul Video (Pilih yang Terbaik)</h4>
-            <button onclick="copyAllTitles()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded">📋 Copy Semua</button>
-          </div>
-          <div id="titlesList" class="space-y-2"></div>
-        </div>
-
-        <div class="glass-dark rounded-xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <h4 class="font-bold">📝 Deskripsi SEO</h4>
-            <button onclick="copyDescription()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded">📋 Copy</button>
-          </div>
-          <div id="seoDescription" class="bg-black/30 rounded-lg p-4 text-sm whitespace-pre-wrap max-h-80 overflow-y-auto scrollbar-custom"></div>
-        </div>
-
-        <div class="glass-dark rounded-xl p-5">
-          <h4 class="font-bold mb-3">🏷️ Hashtags & Tags</h4>
-          <div id="hashtagsList" class="flex flex-wrap gap-2"></div>
-        </div>
-
-        <div class="glass-dark rounded-xl p-5">
-          <h4 class="font-bold mb-3">🎯 SEO Score</h4>
-          <div class="grid grid-cols-4 gap-3">
-            <div class="text-center">
-              <div class="text-3xl font-bold text-green-400" id="seoScore1">95</div>
-              <div class="text-xs text-gray-400">Relevansi</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-blue-400" id="seoScore2">88</div>
-              <div class="text-xs text-gray-400">Hook</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-purple-400" id="seoScore3">92</div>
-              <div class="text-xs text-gray-400">SEO</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-yellow-400" id="seoScore4">90</div>
-              <div class="text-xs text-gray-400">Viral</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-between mt-6">
-        <button onclick="goToStep(5)" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold">← Kembali</button>
-        <button id="btnToStep7" onclick="goToStep(7)" disabled class="gradient-btn text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lanjut ke Step 7 →</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- STEP 7: DOWNLOAD -->
-  <section id="section7" class="hidden fade-in">
-    <div class="glass rounded-2xl p-6 md:p-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-xl gradient-btn flex items-center justify-center text-2xl">📥</div>
-        <div>
-          <h2 class="text-2xl font-bold">Download & Publish</h2>
-          <p class="text-gray-400 text-sm">Video siap publish! Download ke perangkat atau share langsung</p>
-        </div>
-      </div>
-
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="glass-dark rounded-xl p-5">
-          <h4 class="font-bold mb-3">🎬 Preview Final Video</h4>
-          <video id="finalVideo" class="w-full rounded-lg bg-black" controls></video>
-          <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
-            <div class="bg-black/30 rounded p-2">
-              <div class="text-gray-400">Resolusi</div>
-              <div id="finalResolution" class="font-bold">-</div>
-            </div>
-            <div class="bg-black/30 rounded p-2">
-              <div class="text-gray-400">Durasi</div>
-              <div id="finalDuration" class="font-bold">-</div>
-            </div>
-            <div class="bg-black/30 rounded p-2">
-              <div class="text-gray-400">Ukuran</div>
-              <div id="finalSize" class="font-bold">-</div>
-            </div>
-            <div class="bg-black/30 rounded p-2">
-              <div class="text-gray-400">Format</div>
-              <div class="font-bold">MP4 (H.264)</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="glass-dark rounded-xl p-5">
-          <h4 class="font-bold mb-3">💾 Download & Share</h4>
-          <div class="space-y-3">
-            <button onclick="downloadVideo()" class="w-full success-btn text-white px-4 py-3 rounded-lg font-bold flex items-center justify-center gap-2">
-              <span>📥</span> Download Video (MP4)
+          <input type="password" id="groqKey" placeholder="gsk_..." class="input-field w-full p-3 rounded-lg mb-2" />
+          <div class="flex gap-2">
+            <button onclick="testGroq()" class="btn-secondary px-4 py-2 rounded-lg text-sm flex-1">
+              <i class="fas fa-plug mr-1"></i>Tes Koneksi
             </button>
-            <button onclick="downloadCaption()" class="w-full gradient-btn text-white px-4 py-3 rounded-lg font-bold flex items-center justify-center gap-2">
-              <span>📝</span> Download Caption (SRT)
+            <a href="https://console.groq.com/keys" target="_blank" class="btn-secondary px-4 py-2 rounded-lg text-sm text-center flex-1">
+              <i class="fas fa-external-link-alt mr-1"></i>Dapatkan Key
+            </a>
+          </div>
+        </div>
+
+        <!-- Gemini -->
+        <div class="glass rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                <i class="fas fa-gem text-blue-400"></i>
+              </div>
+              <div>
+                <h3 class="font-bold">Gemini AI API</h3>
+                <p class="text-xs text-gray-400">Alternatif untuk generate konten</p>
+              </div>
+            </div>
+            <div id="geminiStatus" class="text-xs px-2 py-1 rounded-full bg-gray-700">Belum dicek</div>
+          </div>
+          <input type="password" id="geminiKey" placeholder="AIza..." class="input-field w-full p-3 rounded-lg mb-2" />
+          <div class="flex gap-2">
+            <button onclick="testGemini()" class="btn-secondary px-4 py-2 rounded-lg text-sm flex-1">
+              <i class="fas fa-plug mr-1"></i>Tes Koneksi
             </button>
-            <button onclick="copyMetadata()" class="w-full gradient-btn text-white px-4 py-3 rounded-lg font-bold flex items-center justify-center gap-2">
-              <span>📋</span> Copy Judul & Deskripsi
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="btn-secondary px-4 py-2 rounded-lg text-sm text-center flex-1">
+              <i class="fas fa-external-link-alt mr-1"></i>Dapatkan Key
+            </a>
+          </div>
+        </div>
+
+        <!-- Pexels -->
+        <div class="glass rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                <i class="fas fa-video text-green-400"></i>
+              </div>
+              <div>
+                <h3 class="font-bold">Pexels API <span class="text-red-400">*</span></h3>
+                <p class="text-xs text-gray-400">WAJIB - Sumber video copyright-free</p>
+              </div>
+            </div>
+            <div id="pexelsStatus" class="text-xs px-2 py-1 rounded-full bg-gray-700">Belum dicek</div>
+          </div>
+          <input type="password" id="pexelsKey" placeholder="Pexels API Key..." class="input-field w-full p-3 rounded-lg mb-2" />
+          <div class="flex gap-2">
+            <button onclick="testPexels()" class="btn-secondary px-4 py-2 rounded-lg text-sm flex-1">
+              <i class="fas fa-plug mr-1"></i>Tes Koneksi
+            </button>
+            <a href="https://www.pexels.com/api/" target="_blank" class="btn-secondary px-4 py-2 rounded-lg text-sm text-center flex-1">
+              <i class="fas fa-external-link-alt mr-1"></i>Dapatkan Key
+            </a>
+          </div>
+        </div>
+
+        <div class="text-xs text-gray-400 mt-4 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
+          <i class="fas fa-info-circle text-yellow-400 mr-1"></i>
+          <strong>Catatan:</strong> API key Anda disimpan hanya di browser lokal (localStorage) dan TIDAK dikirim ke server manapun selain provider resmi.
+        </div>
+      </div>
+
+      <div class="flex justify-between mt-6">
+        <div></div>
+        <button onclick="nextStep(2)" class="btn-primary px-6 py-3 rounded-xl font-semibold">
+          Lanjut <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 2: UPLOAD AUDIO -->
+    <section id="step-2" class="step hidden fade-in">
+      <h2 class="text-2xl md:text-3xl font-bold mb-2">
+        <i class="fas fa-microphone text-pink-400 mr-2"></i>Upload Audio/Voice
+      </h2>
+      <p class="text-gray-400 mb-6">Upload file suara yang akan menjadi dasar video Anda</p>
+
+      <div id="uploadArea" class="glass rounded-xl p-8 text-center cursor-pointer hover:bg-white/10 transition" onclick="document.getElementById('audioInput').click()">
+        <i class="fas fa-cloud-upload-alt text-5xl text-purple-400 mb-4"></i>
+        <p class="text-lg font-semibold mb-2">Klik atau drag file audio ke sini</p>
+        <p class="text-sm text-gray-400">Format: MP3, WAV, M4A, OGG (Maks 25MB)</p>
+        <input type="file" id="audioInput" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)" />
+      </div>
+
+      <div id="audioInfo" class="hidden mt-4 glass rounded-xl p-4">
+        <div class="flex items-center gap-4">
+          <i class="fas fa-file-audio text-3xl text-purple-400"></i>
+          <div class="flex-1">
+            <p class="font-semibold" id="audioName">-</p>
+            <p class="text-sm text-gray-400" id="audioSize">-</p>
+          </div>
+          <button onclick="removeAudio()" class="text-red-400 hover:text-red-300">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <audio id="audioPreview" controls class="w-full mt-3"></audio>
+      </div>
+
+      <div class="mt-4">
+        <label class="block mb-2 text-sm font-semibold">Atau ketik teks manual (tanpa audio):</label>
+        <textarea id="manualText" class="input-field w-full p-3 rounded-lg h-24" placeholder="Ketik teks/narasi Anda di sini jika tidak punya file audio..."></textarea>
+      </div>
+
+      <div class="flex justify-between mt-6">
+        <button onclick="prevStep(1)" class="btn-secondary px-6 py-3 rounded-xl font-semibold">
+          <i class="fas fa-arrow-left mr-2"></i>Kembali
+        </button>
+        <button onclick="nextStep(3)" class="btn-primary px-6 py-3 rounded-xl font-semibold">
+          Lanjut <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 3: TRANSCRIBE & ANALYZE -->
+    <section id="step-3" class="step hidden fade-in">
+      <h2 class="text-2xl md:text-3xl font-bold mb-2">
+        <i class="fas fa-magic text-yellow-400 mr-2"></i>AI Transkripsi & Analisis
+      </h2>
+      <p class="text-gray-400 mb-6">AI akan mengubah audio jadi teks dan menganalisis tema</p>
+
+      <div class="mb-4">
+        <label class="block mb-2 text-sm font-semibold">Pilih AI Provider:</label>
+        <select id="aiProvider" class="input-field w-full p-3 rounded-lg">
+          <option value="groq">Groq (Cepat - Direkomendasikan)</option>
+          <option value="gemini">Gemini AI</option>
+        </select>
+      </div>
+
+      <div id="transcribeResult" class="glass rounded-xl p-4 mb-4">
+        <h3 class="font-semibold mb-2"><i class="fas fa-file-alt mr-2"></i>Transkripsi:</h3>
+        <div id="transcribeContent" class="text-gray-300 text-sm min-h-[80px]">
+          <span class="text-gray-500 italic">Belum ada transkripsi. Klik tombol di bawah untuk memulai.</span>
+        </div>
+      </div>
+
+      <div id="themeResult" class="glass rounded-xl p-4 mb-4">
+        <h3 class="font-semibold mb-2"><i class="fas fa-tags mr-2"></i>Tema & Keywords:</h3>
+        <div id="themeContent" class="min-h-[40px]">
+          <span class="text-gray-500 italic">Belum dianalisis</span>
+        </div>
+      </div>
+
+      <button onclick="startTranscribe()" id="transcribeBtn" class="btn-primary w-full py-3 rounded-xl font-semibold mb-4">
+        <i class="fas fa-brain mr-2"></i>Mulai Transkripsi & Analisis AI
+      </button>
+
+      <div class="flex justify-between mt-6">
+        <button onclick="prevStep(2)" class="btn-secondary px-6 py-3 rounded-xl font-semibold">
+          <i class="fas fa-arrow-left mr-2"></i>Kembali
+        </button>
+        <button onclick="nextStep(4)" class="btn-primary px-6 py-3 rounded-xl font-semibold">
+          Lanjut <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 4: SEARCH VIDEOS -->
+    <section id="step-4" class="step hidden fade-in">
+      <h2 class="text-2xl md:text-3xl font-bold mb-2">
+        <i class="fas fa-search text-green-400 mr-2"></i>Cari Video Copyright-Free
+      </h2>
+      <p class="text-gray-400 mb-6">Pilih video yang sesuai dengan tema konten Anda</p>
+
+      <div class="flex gap-2 mb-4">
+        <input type="text" id="searchQuery" class="input-field flex-1 p-3 rounded-lg" placeholder="Keyword pencarian (auto dari analisis)..." />
+        <button onclick="searchVideos()" class="btn-primary px-6 rounded-lg font-semibold">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-sm text-gray-400">Pilih 3-8 video untuk video Anda</p>
+        <button onclick="autoSelectVideos()" class="btn-secondary px-4 py-2 rounded-lg text-sm">
+          <i class="fas fa-random mr-1"></i>Auto Pilih
+        </button>
+      </div>
+
+      <div id="videoGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[500px] overflow-y-auto scrollbar p-1">
+        <div class="col-span-full text-center text-gray-500 py-8">
+          <i class="fas fa-video text-4xl mb-2"></i>
+          <p>Klik tombol search atau lanjutkan untuk mencari video</p>
+        </div>
+      </div>
+
+      <div class="flex justify-between mt-6">
+        <button onclick="prevStep(3)" class="btn-secondary px-6 py-3 rounded-xl font-semibold">
+          <i class="fas fa-arrow-left mr-2"></i>Kembali
+        </button>
+        <button onclick="nextStep(5)" class="btn-primary px-6 py-3 rounded-xl font-semibold">
+          Lanjut <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 5: EDIT & PREVIEW -->
+    <section id="step-5" class="step hidden fade-in">
+      <h2 class="text-2xl md:text-3xl font-bold mb-2">
+        <i class="fas fa-edit text-blue-400 mr-2"></i>Edit & Preview Video
+      </h2>
+      <p class="text-gray-400 mb-6">Atur video dan lihat preview hasilnya</p>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <!-- Preview -->
+        <div>
+          <h3 class="font-semibold mb-2">Preview</h3>
+          <div class="preview-container" id="previewContainer">
+            <canvas id="previewCanvas" width="360" height="640" class="w-full"></canvas>
+            <div id="captionOverlay" class="caption-overlay hidden">Caption preview</div>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button onclick="playPreview()" class="btn-secondary flex-1 py-2 rounded-lg">
+              <i class="fas fa-play mr-1"></i>Play
+            </button>
+            <button onclick="stopPreview()" class="btn-secondary flex-1 py-2 rounded-lg">
+              <i class="fas fa-stop mr-1"></i>Stop
             </button>
           </div>
+        </div>
 
-          <h4 class="font-bold mt-6 mb-3">📱 Quick Share</h4>
-          <div class="grid grid-cols-2 gap-2">
-            <button onclick="shareTo('tiktok')" class="bg-black hover:bg-gray-800 text-white px-3 py-2 rounded-lg text-sm font-semibold">🎵 TikTok</button>
-            <button onclick="shareTo('instagram')" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-2 rounded-lg text-sm font-semibold">📸 Instagram</button>
-            <button onclick="shareTo('youtube')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-semibold">▶️ YouTube</button>
-            <button onclick="shareTo('facebook')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold">👥 Facebook</button>
-          </div>
-
-          <div class="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-            <div class="flex items-center gap-2 text-sm">
-              <span class="text-green-400">✅</span>
-              <span>Video siap publish tanpa watermark!</span>
+        <!-- Settings -->
+        <div>
+          <h3 class="font-semibold mb-2">Pengaturan</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="text-sm mb-1 block">Durasi per klip (detik):</label>
+              <input type="range" id="clipDuration" min="2" max="10" value="4" class="w-full" oninput="document.getElementById('clipDurVal').textContent=this.value+'s'" />
+              <span id="clipDurVal" class="text-sm text-purple-400">4s</span>
+            </div>
+            <div>
+              <label class="text-sm mb-1 block">Efek Transisi:</label>
+              <select id="transitionEffect" class="input-field w-full p-2 rounded-lg">
+                <option value="fade">Fade</option>
+                <option value="slide">Slide</option>
+                <option value="zoom">Zoom</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="enableCaption" checked />
+              <label for="enableCaption" class="text-sm">Auto Caption</label>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="enableFilter" checked />
+              <label for="enableFilter" class="text-sm">Auto Color Filter</label>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="enableAudio" checked />
+              <label for="enableAudio" class="text-sm">Gunakan Audio Upload</label>
+            </div>
+            <div>
+              <label class="text-sm mb-1 block">Font Caption:</label>
+              <select id="captionFont" class="input-field w-full p-2 rounded-lg">
+                <option value="Arial">Arial</option>
+                <option value="Impact">Impact</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Georgia">Georgia</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm mb-1 block">Warna Caption:</label>
+              <input type="color" id="captionColor" value="#ffffff" class="w-full h-10 rounded" />
             </div>
           </div>
+
+          <div class="mt-4 p-3 bg-purple-500/10 rounded-lg border border-purple-500/30">
+            <p class="text-xs"><i class="fas fa-list mr-1"></i>Video terpilih: <span id="selectedCount" class="font-bold text-purple-400">0</span></p>
+          </div>
         </div>
       </div>
 
-      <div class="mt-6 glass-dark rounded-xl p-5">
-        <h4 class="font-bold mb-3">🎉 Selesai!</h4>
-        <p class="text-sm text-gray-300 mb-3">Video Anda telah berhasil dibuat dan siap untuk di-publish ke platform favorit Anda.</p>
-        <div class="flex gap-2">
-          <button onclick="resetApp()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-semibold">🔄 Buat Video Baru</button>
-          <button onclick="goToStep(1)" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-semibold">🏠 Kembali ke Awal</button>
+      <div class="flex justify-between mt-6">
+        <button onclick="prevStep(4)" class="btn-secondary px-6 py-3 rounded-xl font-semibold">
+          <i class="fas fa-arrow-left mr-2"></i>Kembali
+        </button>
+        <button onclick="nextStep(6)" class="btn-primary px-6 py-3 rounded-xl font-semibold">
+          Lanjut <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 6: RESOLUTION -->
+    <section id="step-6" class="step hidden fade-in">
+      <h2 class="text-2xl md:text-3xl font-bold mb-2">
+        <i class="fas fa-expand text-indigo-400 mr-2"></i>Pilih Resolusi & Platform
+      </h2>
+      <p class="text-gray-400 mb-6">Pilih format video sesuai platform tujuan</p>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3" id="resolutionGrid">
+        <div class="glass rounded-xl p-4 text-center cursor-pointer video-card" onclick="selectResolution(this, 1080, 1920, 'TikTok')" data-res="tiktok">
+          <i class="fab fa-tiktok text-3xl mb-2"></i>
+          <p class="font-bold text-sm">TikTok</p>
+          <p class="text-xs text-gray-400">1080x1920</p>
+          <p class="text-xs text-pink-400">Portrait 9:16</p>
+        </div>
+        <div class="glass rounded-xl p-4 text-center cursor-pointer video-card" onclick="selectResolution(this, 1080, 1920, 'Reels')" data-res="reels">
+          <i class="fab fa-instagram text-3xl mb-2"></i>
+          <p class="font-bold text-sm">Reels</p>
+          <p class="text-xs text-gray-400">1080x1920</p>
+          <p class="text-xs text-pink-400">Portrait 9:16</p>
+        </div>
+        <div class="glass rounded-xl p-4 text-center cursor-pointer video-card" onclick="selectResolution(this, 1080, 1920, 'YT Shorts')" data-res="shorts">
+          <i class="fab fa-youtube text-3xl mb-2"></i>
+          <p class="font-bold text-sm">YT Shorts</p>
+          <p class="text-xs text-gray-400">1080x1920</p>
+          <p class="text-xs text-pink-400">Portrait 9:16</p>
+        </div>
+        <div class="glass rounded-xl p-4 text-center cursor-pointer video-card" onclick="selectResolution(this, 1920, 1080, 'YouTube')" data-res="youtube">
+          <i class="fab fa-youtube text-3xl mb-2 text-red-500"></i>
+          <p class="font-bold text-sm">YouTube</p>
+          <p class="text-xs text-gray-400">1920x1080</p>
+          <p class="text-xs text-blue-400">Landscape 16:9</p>
+        </div>
+        <div class="glass rounded-xl p-4 text-center cursor-pointer video-card" onclick="selectResolution(this, 1280, 720, 'Facebook')" data-res="facebook">
+          <i class="fab fa-facebook text-3xl mb-2 text-blue-500"></i>
+          <p class="font-bold text-sm">Facebook</p>
+          <p class="text-xs text-gray-400">1280x720</p>
+          <p class="text-xs text-blue-400">Landscape 16:9</p>
+        </div>
+        <div class="glass rounded-xl p-4 text-center cursor-pointer video-card" onclick="selectResolution(this, 1080, 1080, 'Square')" data-res="square">
+          <i class="fas fa-square text-3xl mb-2"></i>
+          <p class="font-bold text-sm">Square</p>
+          <p class="text-xs text-gray-400">1080x1080</p>
+          <p class="text-xs text-yellow-400">1:1</p>
         </div>
       </div>
-    </div>
-  </section>
 
-</main>
+      <div class="mt-4 glass rounded-xl p-4">
+        <h3 class="font-semibold mb-2">Resolusi Kustom:</h3>
+        <div class="flex gap-2 items-center">
+          <input type="number" id="customW" placeholder="Width" value="1080" class="input-field p-2 rounded-lg w-24" />
+          <span>x</span>
+          <input type="number" id="customH" placeholder="Height" value="1920" class="input-field p-2 rounded-lg w-24" />
+          <button onclick="applyCustomRes()" class="btn-secondary px-4 py-2 rounded-lg">Apply</button>
+        </div>
+      </div>
 
-<!-- HELP MODAL -->
-<div id="helpModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-  <div class="glass rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-custom p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-2xl font-bold">📖 Panduan Penggunaan</h3>
-      <button onclick="closeHelp()" class="text-2xl hover:text-red-400">✕</button>
-    </div>
-    <div class="space-y-4 text-sm">
-      <div>
-        <h4 class="font-bold text-lg mb-2">🚀 Cara Install & Menjalankan</h4>
-        <p class="text-gray-300 mb-2">Aplikasi ini <strong>TIDAK PERLU INSTALL</strong>! Langsung bisa dijalankan di browser:</p>
-        <ol class="list-decimal list-inside space-y-1 text-gray-300 ml-2">
-          <li>Simpan file ini sebagai <code class="bg-black/30 px-2 py-0.5 rounded">ai-video-creator.html</code></li>
-          <li>Double-click file tersebut → otomatis terbuka di browser</li>
-          <li>Atau drag file ke browser (Chrome, Firefox, Edge, Safari)</li>
-          <li>Pastikan koneksi internet aktif</li>
-        </ol>
+      <div class="flex justify-between mt-6">
+        <button onclick="prevStep(5)" class="btn-secondary px-6 py-3 rounded-xl font-semibold">
+          <i class="fas fa-arrow-left mr-2"></i>Kembali
+        </button>
+        <button onclick="nextStep(7)" class="btn-primary px-6 py-3 rounded-xl font-semibold">
+          Lanjut <i class="fas fa-arrow-right ml-2"></i>
+        </button>
       </div>
-      <div>
-        <h4 class="font-bold text-lg mb-2">🔑 Step 1: Setup API Keys</h4>
-        <p class="text-gray-300">Dapatkan API key gratis dari masing-masing provider dan masukkan ke form. Klik "Test Koneksi" untuk memastikan terhubung.</p>
+    </section>
+
+    <!-- STEP 7: GENERATE & DOWNLOAD -->
+    <section id="step-7" class="step hidden fade-in">
+      <h2 class="text-2xl md:text-3xl font-bold mb-2">
+        <i class="fas fa-rocket text-red-400 mr-2"></i>Generate & Download
+      </h2>
+      <p class="text-gray-400 mb-6">Generate video final + metadata SEO untuk viral</p>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <h3 class="font-semibold mb-3">Metadata SEO (Auto-AI)</h3>
+          <button onclick="generateMetadata()" class="btn-primary w-full py-2 rounded-lg mb-3">
+            <i class="fas fa-wand-magic-sparkles mr-1"></i>Generate Judul & Deskripsi
+          </button>
+          <label class="text-sm block mb-1">Judul Video (SEO + HOOK):</label>
+          <input type="text" id="videoTitle" class="input-field w-full p-2 rounded-lg mb-2" placeholder="Judul viral akan muncul di sini..." />
+          <label class="text-sm block mb-1">Deskripsi (SEO):</label>
+          <textarea id="videoDesc" class="input-field w-full p-2 rounded-lg h-24 mb-2" placeholder="Deskripsi SEO otomatis..."></textarea>
+          <label class="text-sm block mb-1">Tags/Hashtags:</label>
+          <input type="text" id="videoTags" class="input-field w-full p-2 rounded-lg" placeholder="#viral #fyp #..." />
+        </div>
+
+        <div>
+          <h3 class="font-semibold mb-3">Render Video Final</h3>
+          <div class="glass rounded-xl p-4 mb-3">
+            <p class="text-sm mb-1">Resolusi: <span id="finalRes" class="text-purple-400 font-bold">-</span></p>
+            <p class="text-sm mb-1">Platform: <span id="finalPlatform" class="text-pink-400 font-bold">-</span></p>
+            <p class="text-sm">Video clips: <span id="finalClips" class="text-green-400 font-bold">0</span></p>
+          </div>
+
+          <button onclick="renderVideo()" id="renderBtn" class="btn-primary w-full py-3 rounded-lg font-semibold mb-3">
+            <i class="fas fa-film mr-2"></i>Render Video Final
+          </button>
+
+          <div id="renderProgress" class="hidden">
+            <div class="progress-bar mb-2">
+              <div id="progressFill" class="progress-fill" style="width:0%"></div>
+            </div>
+            <p class="text-sm text-center" id="progressText">Memproses...</p>
+          </div>
+
+          <div id="downloadArea" class="hidden mt-3">
+            <video id="finalVideo" controls class="w-full rounded-lg mb-3"></video>
+            <button onclick="downloadVideo()" class="btn-primary w-full py-3 rounded-lg font-semibold">
+              <i class="fas fa-download mr-2"></i>Download Video
+            </button>
+            <button onclick="downloadMetadata()" class="btn-secondary w-full py-2 rounded-lg mt-2">
+              <i class="fas fa-file-alt mr-1"></i>Download Metadata (TXT)
+            </button>
+          </div>
+        </div>
       </div>
-      <div>
-        <h4 class="font-bold text-lg mb-2">🎵 Step 2: Upload Audio</h4>
-        <p class="text-gray-300">Upload file audio (MP3, WAV, M4A, dll) yang berisi voice over/narasi.</p>
+
+      <div class="flex justify-between mt-6">
+        <button onclick="prevStep(6)" class="btn-secondary px-6 py-3 rounded-xl font-semibold">
+          <i class="fas fa-arrow-left mr-2"></i>Kembali
+        </button>
+        <button onclick="resetApp()" class="btn-primary px-6 py-3 rounded-xl font-semibold">
+          <i class="fas fa-redo mr-2"></i>Buat Video Baru
+        </button>
       </div>
-      <div>
-        <h4 class="font-bold text-lg mb-2">📝 Step 3: Transkripsi</h4>
-        <p class="text-gray-300">AI akan mengubah audio menjadi teks dengan timestamp.</p>
-      </div>
-      <div>
-        <h4 class="font-bold text-lg mb-2">🔍 Step 4: Cari Video</h4>
-        <p class="text-gray-300">AI mencari video bebas copyright dari Pexels sesuai tema.</p>
-      </div>
-      <div>
-        <h4 class="font-bold text-lg mb-2">🎞️ Step 5: Auto Edit</h4>
-        <p class="text-gray-300">Pilih resolusi dan pengaturan, AI akan menggabungkan semuanya.</p>
-      </div>
-      <div>
-        <h4 class="font-bold text-lg mb-2">🚀 Step 6: SEO & Hook</h4>
-        <p class="text-gray-300">Generate judul viral dan deskripsi SEO-friendly.</p>
-      </div>
-      <div>
-        <h4 class="font-bold text-lg mb-2">📥 Step 7: Download</h4>
-        <p class="text-gray-300">Download video final siap publish!</p>
-      </div>
-    </div>
-  </div>
+    </section>
+
+  </main>
+
+  <footer class="text-center text-xs text-gray-500 mt-6 py-4">
+    <p>ðŸŽ¬ AI Video Creator Pro Â© 2026 - Powered by Groq, Gemini & Pexels</p>
+    <p class="mt-1">Semua proses dilakukan di browser Anda. Data aman & privat.</p>
+  </footer>
 </div>
 
-<!-- TOAST NOTIFICATION -->
-<div id="toast" class="hidden fixed bottom-4 right-4 z-50 glass rounded-xl p-4 max-w-sm shadow-2xl">
-  <div class="flex items-start gap-3">
-    <div id="toastIcon" class="text-2xl">✅</div>
-    <div>
-      <div id="toastTitle" class="font-bold">Success</div>
-      <div id="toastMessage" class="text-sm text-gray-300">Message</div>
-    </div>
-  </div>
-</div>
-
-<script type="module">
-import { FFmpeg } from 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js';
-import { fetchFile, toBlobURL } from 'https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js';
-
+<script>
 // ============ GLOBAL STATE ============
-window.appState = {
+const state = {
   currentStep: 1,
-  apiKeys: { groq: '', gemini: '', pexels: '' },
+  apis: { groq: null, gemini: null, pexels: null },
   apiStatus: { groq: false, gemini: false, pexels: false },
   audioFile: null,
-  audioDuration: 0,
-  transcription: null,
-  transcriptionSegments: [],
+  audioUrl: null,
+  transcript: '',
   keywords: [],
-  videos: [],
+  theme: '',
+  searchResults: [],
   selectedVideos: [],
-  resolution: 'landscape',
-  resolutionMap: {
-    'landscape': { w: 1920, h: 1080, label: '1920×1080' },
-    'portrait': { w: 1080, h: 1920, label: '1080×1920' },
-    'square': { w: 1080, h: 1080, label: '1080×1080' },
-    '4k': { w: 3840, h: 2160, label: '3840×2160' }
-  },
-  seoData: null,
-  finalVideoBlob: null,
-  ffmpeg: null,
-  ffmpegLoaded: false
+  resolution: { w: 1080, h: 1920, name: 'TikTok' },
+  finalBlob: null,
+  isPlaying: false,
+  previewInterval: null
 };
 
-// ============ UTILITY FUNCTIONS ============
-window.showToast = function(title, message, type = 'success') {
-  const toast = document.getElementById('toast');
-  const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-  document.getElementById('toastIcon').textContent = icons[type];
-  document.getElementById('toastTitle').textContent = title;
-  document.getElementById('toastMessage').textContent = message;
-  toast.classList.remove('hidden');
-  setTimeout(() => toast.classList.add('hidden'), 4000);
-};
-
-window.showHelp = function() {
-  document.getElementById('helpModal').classList.remove('hidden');
-};
-
-window.closeHelp = function() {
-  document.getElementById('helpModal').classList.add('hidden');
-};
-
-window.goToStep = function(step) {
-  const state = window.appState;
-  
-  // Validation
-  if (step === 2 && !state.apiKeys.groq && !state.apiKeys.gemini) {
-    showToast('Peringatan', 'Setup minimal 1 API key dulu', 'warning');
-    return;
-  }
-  if (step === 3 && !state.audioFile) {
-    showToast('Peringatan', 'Upload audio terlebih dahulu', 'warning');
-    return;
-  }
-  if (step === 4 && !state.transcription) {
-    showToast('Peringatan', 'Transkripsi audio terlebih dahulu', 'warning');
-    return;
-  }
-  if (step === 5 && state.selectedVideos.length === 0) {
-    showToast('Peringatan', 'Pilih minimal 1 video', 'warning');
-    return;
-  }
-  if (step === 6 && !state.finalVideoBlob) {
-    showToast('Peringatan', 'Selesaikan auto edit terlebih dahulu', 'warning');
-    return;
-  }
-  if (step === 7 && !state.seoData) {
-    showToast('Peringatan', 'Generate SEO terlebih dahulu', 'warning');
-    return;
-  }
-
-  state.currentStep = step;
-  
-  // Hide all sections
-  for (let i = 1; i <= 7; i++) {
-    document.getElementById(`section${i}`).classList.add('hidden');
-  }
-  document.getElementById(`section${step}`).classList.remove('hidden');
-  
-  // Update step indicators
-  for (let i = 1; i <= 7; i++) {
-    const stepEl = document.getElementById(`step${i}`);
-    stepEl.className = 'w-10 h-10 rounded-full flex items-center justify-center font-bold';
-    if (i < step) stepEl.classList.add('step-done');
-    else if (i === step) stepEl.classList.add('step-active');
-    else stepEl.classList.add('step-pending');
-  }
-  
-  // Update progress
-  const progress = (step / 7) * 100;
-  document.getElementById('mainProgress').style.width = progress + '%';
-  document.getElementById('progressText').textContent = `Step ${step} dari 7`;
-  
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-window.checkInternet = async function() {
-  const dot = document.getElementById('internetDot');
-  const text = document.getElementById('internetText');
-  const status = document.getElementById('connectionStatus');
-  
-  try {
-    const response = await fetch('https://httpbin.org/get', { mode: 'no-cors', cache: 'no-store' });
-    dot.className = 'w-2 h-2 rounded-full bg-green-500 pulse-dot';
-    text.textContent = 'Online';
-    status.className = 'flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30';
-    showToast('Internet', 'Koneksi internet aktif', 'success');
-    return true;
-  } catch (e) {
-    // Try alternative
-    try {
-      await fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
-      dot.className = 'w-2 h-2 rounded-full bg-green-500 pulse-dot';
-      text.textContent = 'Online';
-      status.className = 'flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30';
-      showToast('Internet', 'Koneksi internet aktif', 'success');
-      return true;
-    } catch (e2) {
-      dot.className = 'w-2 h-2 rounded-full bg-red-500 pulse-dot';
-      text.textContent = 'Offline';
-      status.className = 'flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30';
-      showToast('Internet', 'Tidak ada koneksi internet', 'error');
-      return false;
-    }
-  }
-};
-
-// ============ STEP 1: API TEST ============
-window.testGroq = async function() {
-  const key = document.getElementById('groqKey').value.trim();
-  if (!key) {
-    showToast('Error', 'Masukkan Groq API Key', 'error');
-    return;
-  }
-  
-  const status = document.getElementById('groqStatus');
-  status.textContent = 'Testing...';
-  status.className = 'text-xs px-2 py-1 rounded bg-yellow-500/20 text-yellow-400';
-  
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/models', {
-      headers: { 'Authorization': `Bearer ${key}` }
-    });
-    
-    if (response.ok) {
-      window.appState.apiKeys.groq = key;
-      window.appState.apiStatus.groq = true;
-      status.textContent = '✅ Terhubung';
-      status.className = 'text-xs px-2 py-1 rounded bg-green-500/20 text-green-400';
-      showToast('Groq API', 'Berhasil terhubung!', 'success');
-    } else {
-      throw new Error('Invalid API key');
-    }
-  } catch (e) {
-    status.textContent = '❌ Gagal';
-    status.className = 'text-xs px-2 py-1 rounded bg-red-500/20 text-red-400';
-    showToast('Groq API', 'Gagal terhubung: ' + e.message, 'error');
-  }
-};
-
-window.testGemini = async function() {
-  const key = document.getElementById('geminiKey').value.trim();
-  if (!key) {
-    showToast('Error', 'Masukkan Gemini API Key', 'error');
-    return;
-  }
-  
-  const status = document.getElementById('geminiStatus');
-  status.textContent = 'Testing...';
-  status.className = 'text-xs px-2 py-1 rounded bg-yellow-500/20 text-yellow-400';
-  
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
-    
-    if (response.ok) {
-      window.appState.apiKeys.gemini = key;
-      window.appState.apiStatus.gemini = true;
-      status.textContent = '✅ Terhubung';
-      status.className = 'text-xs px-2 py-1 rounded bg-green-500/20 text-green-400';
-      showToast('Gemini API', 'Berhasil terhubung!', 'success');
-    } else {
-      throw new Error('Invalid API key');
-    }
-  } catch (e) {
-    status.textContent = '❌ Gagal';
-    status.className = 'text-xs px-2 py-1 rounded bg-red-500/20 text-red-400';
-    showToast('Gemini API', 'Gagal terhubung: ' + e.message, 'error');
-  }
-};
-
-window.testPexels = async function() {
-  const key = document.getElementById('pexelsKey').value.trim();
-  if (!key) {
-    showToast('Error', 'Masukkan Pexels API Key', 'error');
-    return;
-  }
-  
-  const status = document.getElementById('pexelsStatus');
-  status.textContent = 'Testing...';
-  status.className = 'text-xs px-2 py-1 rounded bg-yellow-500/20 text-yellow-400';
-  
-  try {
-    const response = await fetch('https://api.pexels.com/videos/search?query=nature&per_page=1', {
-      headers: { 'Authorization': key }
-    });
-    
-    if (response.ok) {
-      window.appState.apiKeys.pexels = key;
-      window.appState.apiStatus.pexels = true;
-      status.textContent = '✅ Terhubung';
-      status.className = 'text-xs px-2 py-1 rounded bg-green-500/20 text-green-400';
-      showToast('Pexels API', 'Berhasil terhubung!', 'success');
-    } else {
-      throw new Error('Invalid API key');
-    }
-  } catch (e) {
-    status.textContent = '❌ Gagal';
-    status.className = 'text-xs px-2 py-1 rounded bg-red-500/20 text-red-400';
-    showToast('Pexels API', 'Gagal terhubung: ' + e.message, 'error');
-  }
-};
-
-// ============ STEP 2: AUDIO UPLOAD ============
-window.handleAudioUpload = function(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  if (file.size > 25 * 1024 * 1024) {
-    showToast('Error', 'Ukuran file maksimal 25MB', 'error');
-    return;
-  }
-  
-  if (!file.type.startsWith('audio/')) {
-    showToast('Error', 'File harus berupa audio', 'error');
-    return;
-  }
-  
-  window.appState.audioFile = file;
-  
-  document.getElementById('uploadContent').classList.add('hidden');
-  document.getElementById('uploadedContent').classList.remove('hidden');
-  document.getElementById('audioFileName').textContent = file.name;
-  document.getElementById('audioFileInfo').textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB • ${file.type}`;
-  
-  // Setup audio player
-  const audioUrl = URL.createObjectURL(file);
-  const player = document.getElementById('audioPlayer');
-  player.src = audioUrl;
-  document.getElementById('audioPlayerBox').classList.remove('hidden');
-  
-  player.addEventListener('loadedmetadata', () => {
-    window.appState.audioDuration = player.duration;
-    document.getElementById('audioDuration').textContent = formatTime(player.duration);
-    document.getElementById('audioSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-    document.getElementById('audioFormat').textContent = file.type.split('/')[1].toUpperCase();
-    generateWaveform();
-  });
-  
-  document.getElementById('btnToStep3').disabled = false;
-  showToast('Audio', 'File audio berhasil diupload', 'success');
-};
-
-function formatTime(seconds) {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
-
-function generateWaveform() {
-  const waveform = document.getElementById('waveform');
-  waveform.innerHTML = '';
-  for (let i = 0; i < 50; i++) {
-    const bar = document.createElement('div');
-    bar.className = 'waveform-bar flex-1 rounded-t';
-    bar.style.height = (Math.random() * 80 + 20) + '%';
-    bar.style.animationDelay = (i * 0.05) + 's';
-    waveform.appendChild(bar);
-  }
-}
-
-// Drag and drop
+// ============ INIT ============
 document.addEventListener('DOMContentLoaded', () => {
-  const uploadArea = document.getElementById('uploadArea');
-  if (uploadArea) {
-    uploadArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadArea.classList.add('border-purple-500', 'bg-purple-500/10');
-    });
-    uploadArea.addEventListener('dragleave', () => {
-      uploadArea.classList.remove('border-purple-500', 'bg-purple-500/10');
-    });
-    uploadArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadArea.classList.remove('border-purple-500', 'bg-purple-500/10');
-      const file = e.dataTransfer.files[0];
-      if (file) {
-        const input = document.getElementById('audioFile');
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        input.files = dt.files;
-        handleAudioUpload({ target: input });
-      }
-    });
-  }
-  
-  // Check internet on load
-  window.checkInternet();
+  loadSavedKeys();
+  setupDragDrop();
+  showToast('Selamat datang! Mulai dengan setup API keys.', 'info');
 });
 
-// ============ STEP 3: TRANSCRIPTION ============
-window.transcribeAudio = async function() {
-  const state = window.appState;
-  if (!state.audioFile) {
-    showToast('Error', 'Upload audio terlebih dahulu', 'error');
-    return;
+function loadSavedKeys() {
+  const saved = localStorage.getItem('aivideo_keys');
+  if (saved) {
+    try {
+      const keys = JSON.parse(saved);
+      if (keys.groq) document.getElementById('groqKey').value = keys.groq;
+      if (keys.gemini) document.getElementById('geminiKey').value = keys.gemini;
+      if (keys.pexels) document.getElementById('pexelsKey').value = keys.pexels;
+    } catch (e) {}
   }
-  
-  const useGroq = state.apiStatus.groq;
-  if (!useGroq) {
-    showToast('Error', 'Groq API diperlukan untuk transkripsi', 'error');
-    return;
-  }
-  
-  const btn = document.getElementById('btnTranscribe');
-  btn.disabled = true;
-  btn.textContent = '⏳ Memproses...';
-  
-  const statusDiv = document.getElementById('transcriptionStatus');
-  const progressDiv = document.getElementById('transcriptionProgress');
-  progressDiv.classList.remove('hidden');
-  
-  try {
-    // Step 1: Upload
-    statusDiv.innerHTML = `
-      <div class="flex items-center gap-2 text-sm"><div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-xs">1</div><span>Mengupload audio...</span></div>
-    `;
-    document.getElementById('transcribeProgressBar').style.width = '20%';
-    document.getElementById('transcribeProgressText').textContent = 'Mengupload audio ke Groq...';
-    
-    const formData = new FormData();
-    formData.append('file', state.audioFile);
-    formData.append('model', document.getElementById('transcriptionModel').value);
-    const lang = document.getElementById('audioLanguage').value;
-    if (lang !== 'auto') formData.append('language', lang);
-    formData.append('response_format', 'verbose_json');
-    formData.append('timestamp_granularities[]', document.getElementById('timestampType').value);
-    
-    // Step 2: Transcribing
-    statusDiv.innerHTML = `
-      <div class="flex items-center gap-2 text-sm"><div class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-xs">✓</div><span>Upload selesai</span></div>
-      <div class="flex items-center gap-2 text-sm"><div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center pulse-dot">2</div><span>Transkripsi audio...</span></div>
-    `;
-    document.getElementById('transcribeProgressBar').style.width = '50%';
-    document.getElementById('transcribeProgressText').textContent = 'AI sedang mentranskripsi audio...';
-    
-    const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${state.apiKeys.groq}` },
-      body: formData
-    });
-    
-    if (!response.ok) {
-      const err = await response.text();
-      throw new Error('Transcription failed: ' + err);
-    }
-    
-    const data = await response.json();
-    
-    // Step 3: Done
-    statusDiv.innerHTML = `
-      <div class="flex items-center gap-2 text-sm"><div class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-xs">✓</div><span>Upload selesai</span></div>
-      <div class="flex items-center gap-2 text-sm"><div class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-xs">✓</div><span>Transkripsi selesai</span></div>
-    `;
-    document.getElementById('transcribeProgressBar').style.width = '100%';
-    document.getElementById('transcribeProgressText').textContent = 'Selesai!';
-    
-    // Save transcription
-    state.transcription = data.text;
-    state.transcriptionSegments = data.segments || [];
-    
-    // Display result
-    document.getElementById('transcriptionResult').classList.remove('hidden');
-    document.getElementById('transcriptionText').textContent = data.text;
-    document.getElementById('wordCount').textContent = data.text.split(/\s+/).filter(w => w).length;
-    document.getElementById('transcribeDuration').textContent = formatTime(data.duration || state.audioDuration);
-    document.getElementById('segmentCount').textContent = state.transcriptionSegments.length;
-    
-    document.getElementById('btnToStep4').disabled = false;
-    showToast('Transkripsi', 'Berhasil mentranskripsi audio', 'success');
-    
-  } catch (e) {
-    showToast('Error', e.message, 'error');
-    statusDiv.innerHTML = `<div class="flex items-center gap-2 text-sm text-red-400">❌ ${e.message}</div>`;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🚀 Mulai Transkripsi';
-  }
-};
+}
 
-window.copyTranscription = function() {
-  const text = document.getElementById('transcriptionText').textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('Copy', 'Transkripsi berhasil disalin', 'success');
+function saveKeys() {
+  const keys = {
+    groq: document.getElementById('groqKey').value.trim(),
+    gemini: document.getElementById('geminiKey').value.trim(),
+    pexels: document.getElementById('pexelsKey').value.trim()
+  };
+  localStorage.setItem('aivideo_keys', JSON.stringify(keys));
+}
+
+function setupDragDrop() {
+  const area = document.getElementById('uploadArea');
+  ['dragenter','dragover'].forEach(ev => {
+    area.addEventListener(ev, e => { e.preventDefault(); area.classList.add('bg-white/10'); });
   });
-};
+  ['dragleave','drop'].forEach(ev => {
+    area.addEventListener(ev, e => { e.preventDefault(); area.classList.remove('bg-white/10'); });
+  });
+  area.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('audio/')) {
+      processAudioFile(file);
+    }
+  });
+}
 
-// ============ STEP 4: VIDEO SEARCH ============
-window.generateKeywords = async function() {
-  const state = window.appState;
-  if (!state.transcription) {
-    showToast('Error', 'Transkripsi belum ada', 'error');
+// ============ TOAST ============
+function showToast(msg, type='info', duration=4000) {
+  const existing = document.querySelectorAll('.toast');
+  existing.forEach(t => t.remove());
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-circle':'info-circle'} mr-2"></i>${msg}`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), duration);
+}
+
+// ============ STEP NAVIGATION ============
+function nextStep(step) {
+  if (!validateStep(state.currentStep, step)) return;
+  goToStep(step);
+}
+
+function prevStep(step) { goToStep(step); }
+
+function goToStep(step) {
+  document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
+  const target = document.getElementById('step-' + step);
+  if (target) {
+    target.classList.remove('hidden');
+    target.classList.add('fade-in');
+  }
+  state.currentStep = step;
+  updateStepIndicator();
+  if (step === 4 && state.keywords.length > 0 && state.searchResults.length === 0) {
+    document.getElementById('searchQuery').value = state.keywords.slice(0,3).join(' ');
+  }
+  if (step === 5) {
+    updateSelectedCount();
+    initPreview();
+  }
+  if (step === 7) {
+    document.getElementById('finalRes').textContent = `${state.resolution.w}x${state.resolution.h}`;
+    document.getElementById('finalPlatform').textContent = state.resolution.name;
+    document.getElementById('finalClips').textContent = state.selectedVideos.length;
+  }
+}
+
+function updateStepIndicator() {
+  document.querySelectorAll('.step-indicator').forEach((el, i) => {
+    const step = i + 1;
+    el.classList.remove('step-active', 'step-done');
+    el.classList.remove('bg-white/10');
+    if (step < state.currentStep) el.classList.add('step-done');
+    else if (step === state.currentStep) el.classList.add('step-active');
+    else el.classList.add('bg-white/10');
+  });
+}
+
+function validateStep(from, to) {
+  if (to > from) {
+    if (from === 1) {
+      const pexels = document.getElementById('pexelsKey').value.trim();
+      if (!pexels) { showToast('Pexels API Key WAJIB diisi!', 'error'); return false; }
+      saveKeys();
+    }
+    if (from === 2) {
+      if (!state.audioFile && !document.getElementById('manualText').value.trim()) {
+        showToast('Upload audio atau ketik teks manual!', 'error'); return false;
+      }
+    }
+    if (from === 3) {
+      if (!state.transcript) {
+        showToast('Jalankan transkripsi terlebih dahulu!', 'error'); return false;
+      }
+    }
+    if (from === 4) {
+      if (state.selectedVideos.length === 0) {
+        showToast('Pilih minimal 1 video!', 'error'); return false;
+      }
+    }
+  }
+  return true;
+}
+
+// ============ API TESTS ============
+async function testGroq() {
+  const key = document.getElementById('groqKey').value.trim();
+  const statusEl = document.getElementById('groqStatus');
+  if (!key) { showToast('Masukkan Groq API Key!', 'error'); return; }
+  statusEl.textContent = 'Memeriksa...';
+  statusEl.className = 'text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400';
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/models', {
+      headers: { 'Authorization': 'Bearer ' + key }
+    });
+    if (res.ok) {
+      state.apiStatus.groq = true;
+      state.apis.groq = key;
+      statusEl.textContent = 'âœ“ Terhubung';
+      statusEl.className = 'text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400';
+      showToast('Groq API terhubung!', 'success');
+      saveKeys();
+    } else {
+      throw new Error('Invalid key');
+    }
+  } catch (e) {
+    state.apiStatus.groq = false;
+    statusEl.textContent = 'âœ— Gagal';
+    statusEl.className = 'text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-400';
+    showToast('Groq API gagal terhubung. Periksa key Anda.', 'error');
+  }
+}
+
+async function testGemini() {
+  const key = document.getElementById('geminiKey').value.trim();
+  const statusEl = document.getElementById('geminiStatus');
+  if (!key) { showToast('Masukkan Gemini API Key!', 'error'); return; }
+  statusEl.textContent = 'Memeriksa...';
+  statusEl.className = 'text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400';
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: 'Hi' }] }] })
+    });
+    if (res.ok) {
+      state.apiStatus.gemini = true;
+      state.apis.gemini = key;
+      statusEl.textContent = 'âœ“ Terhubung';
+      statusEl.className = 'text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400';
+      showToast('Gemini API terhubung!', 'success');
+      saveKeys();
+    } else {
+      throw new Error('Invalid key');
+    }
+  } catch (e) {
+    state.apiStatus.gemini = false;
+    statusEl.textContent = 'âœ— Gagal';
+    statusEl.className = 'text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-400';
+    showToast('Gemini API gagal terhubung.', 'error');
+  }
+}
+
+async function testPexels() {
+  const key = document.getElementById('pexelsKey').value.trim();
+  const statusEl = document.getElementById('pexelsStatus');
+  if (!key) { showToast('Masukkan Pexels API Key!', 'error'); return; }
+  statusEl.textContent = 'Memeriksa...';
+  statusEl.className = 'text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400';
+  try {
+    const res = await fetch('https://api.pexels.com/videos/popular?per_page=1', {
+      headers: { 'Authorization': key }
+    });
+    if (res.ok) {
+      state.apiStatus.pexels = true;
+      state.apis.pexels = key;
+      statusEl.textContent = 'âœ“ Terhubung';
+      statusEl.className = 'text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400';
+      showToast('Pexels API terhubung!', 'success');
+      saveKeys();
+    } else {
+      throw new Error('Invalid key');
+    }
+  } catch (e) {
+    state.apiStatus.pexels = false;
+    statusEl.textContent = 'âœ— Gagal';
+    statusEl.className = 'text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-400';
+    showToast('Pexels API gagal terhubung.', 'error');
+  }
+}
+
+// ============ AUDIO UPLOAD ============
+function handleAudioUpload(e) {
+  const file = e.target.files[0];
+  if (file) processAudioFile(file);
+}
+
+function processAudioFile(file) {
+  if (file.size > 25 * 1024 * 1024) {
+    showToast('File terlalu besar (maks 25MB)', 'error');
     return;
   }
-  
-  const btn = document.getElementById('btnGenerateKeywords');
+  state.audioFile = file;
+  state.audioUrl = URL.createObjectURL(file);
+  document.getElementById('audioInfo').classList.remove('hidden');
+  document.getElementById('audioName').textContent = file.name;
+  document.getElementById('audioSize').textContent = `${(file.size/1024/1024).toFixed(2)} MB`;
+  document.getElementById('audioPreview').src = state.audioUrl;
+  showToast('Audio berhasil diupload!', 'success');
+}
+
+function removeAudio() {
+  state.audioFile = null;
+  if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
+  state.audioUrl = null;
+  document.getElementById('audioInfo').classList.add('hidden');
+  document.getElementById('audioInput').value = '';
+  document.getElementById('audioPreview').src = '';
+}
+
+// ============ TRANSCRIBE ============
+async function startTranscribe() {
+  const btn = document.getElementById('transcribeBtn');
+  const provider = document.getElementById('aiProvider').value;
+  const manualText = document.getElementById('manualText').value.trim();
+
   btn.disabled = true;
-  btn.textContent = '⏳ Generating...';
-  
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+
   try {
-    let keywords = [];
-    
-    // Try Gemini first
-    if (state.apiStatus.gemini) {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKeys.gemini}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Berdasarkan transkrip berikut, berikan 8 keyword bahasa Inggris singkat (1-2 kata) yang paling relevan untuk mencari video stock footage. Format: array JSON saja, contoh: ["nature", "sunset", "ocean"]. Transkrip:\n\n${state.transcription.substring(0, 1000)}`
-            }]
-          }],
-          generationConfig: { temperature: 0.7 }
-        })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const text = data.candidates[0].content.parts[0].text;
-        const match = text.match(/\[[\s\S]*\]/);
-        if (match) keywords = JSON.parse(match[0]);
-      }
-    }
-    
-    // Fallback to Groq if needed
-    if (keywords.length === 0 && state.apiStatus.groq) {
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${state.apiKeys.groq}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [{
-            role: 'user',
-            content: `Berdasarkan transkrip berikut, berikan 8 keyword bahasa Inggris singkat (1-2 kata) untuk mencari video stock footage. Format JSON array saja: ["keyword1", "keyword2"]. Transkrip:\n\n${state.transcription.substring(0, 1000)}`
-          }],
-          temperature: 0.7,
-          response_format: { type: 'json_object' }
-        })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const content = data.choices[0].message.content;
-        try {
-          const parsed = JSON.parse(content);
-          keywords = parsed.keywords || Object.values(parsed)[0] || [];
-        } catch {
-          const match = content.match(/\[[\s\S]*\]/);
-          if (match) keywords = JSON.parse(match[0]);
+    // TRANSCRIBE
+    if (manualText) {
+      state.transcript = manualText;
+    } else if (state.audioFile) {
+      if (provider === 'groq') {
+        if (!state.apis.groq) {
+          const key = document.getElementById('groqKey').value.trim();
+          if (!key) throw new Error('Groq API Key belum diisi');
+          state.apis.groq = key;
         }
+        state.transcript = await transcribeWithGroq(state.audioFile);
+      } else {
+        showToast('Gemini belum support audio transcription. Pakai Groq atau teks manual.', 'error');
+        throw new Error('Use Groq or manual');
       }
+    } else {
+      throw new Error('No audio or text provided');
     }
-    
-    // Ultimate fallback: extract from text
-    if (keywords.length === 0) {
-      const words = state.transcription.toLowerCase().split(/\s+/).filter(w => w.length > 4);
-      const unique = [...new Set(words)].slice(0, 8);
-      keywords = unique;
+
+    document.getElementById('transcribeContent').innerHTML =
+      `<div class="text-white">${state.transcript}</div>`;
+
+    // ANALYZE THEME & KEYWORDS
+    let analysis;
+    if (provider === 'groq' && state.apis.groq) {
+      analysis = await analyzeWithGroq(state.transcript);
+    } else if (provider === 'gemini' && state.apis.gemini) {
+      analysis = await analyzeWithGemini(state.transcript);
+    } else {
+      // Fallback: extract keywords sederhana
+      analysis = extractKeywordsLocal(state.transcript);
     }
-    
-    state.keywords = keywords;
-    
-    // Display keywords
-    const container = document.getElementById('keywordsContainer');
-    container.innerHTML = keywords.map(k => `
-      <span class="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-sm">${k}</span>
-    `).join('');
-    
-    document.getElementById('videoSearchSection').classList.remove('hidden');
-    
-    // Auto search
-    await searchVideos();
-    
-    showToast('Keywords', 'Keywords berhasil di-generate', 'success');
-    
+
+    state.keywords = analysis.keywords || [];
+    state.theme = analysis.theme || '';
+
+    document.getElementById('themeContent').innerHTML =
+      `<p class="text-sm mb-2"><strong>Tema:</strong> ${state.theme}</p>
+       <div>${state.keywords.map(k => `<span class="tag-chip">${k}</span>`).join('')}</div>`;
+
+    showToast('Transkripsi & analisis selesai!', 'success');
   } catch (e) {
-    showToast('Error', e.message, 'error');
+    console.error(e);
+    showToast('Error: ' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = '✨ Generate Keywords dengan AI';
+    btn.innerHTML = '<i class="fas fa-brain mr-2"></i>Mulai Transkripsi & Analisis AI';
   }
-};
+}
 
-window.searchVideos = async function() {
-  const state = window.appState;
-  if (!state.apiStatus.pexels) {
-    showToast('Error', 'Pexels API belum disetup', 'error');
-    return;
+async function transcribeWithGroq(audioFile) {
+  const formData = new FormData();
+  formData.append('file', audioFile);
+  formData.append('model', 'whisper-large-v3');
+  formData.append('response_format', 'json');
+  formData.append('language', 'id');
+
+  const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + state.apis.groq },
+    body: formData
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'Transkripsi gagal');
   }
-  if (state.keywords.length === 0) {
-    showToast('Error', 'Generate keywords terlebih dahulu', 'error');
-    return;
-  }
-  
-  const grid = document.getElementById('videoGrid');
-  grid.innerHTML = '<div class="col-span-full text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-sm text-gray-400">Mencari video...</p></div>';
-  
+  const data = await res.json();
+  return data.text || '';
+}
+
+async function analyzeWithGroq(text) {
+  const prompt = `Analisis teks berikut dan ekstrak:
+1. Tema utama (1 kalimat singkat)
+2. 5-8 keywords untuk mencari video stock yang relevan (dalam bahasa Inggris, comma separated)
+
+Teks: "${text.substring(0, 1500)}"
+
+Berikan respon dalam format JSON valid:
+{"theme": "tema di sini", "keywords": ["keyword1", "keyword2", ...]}
+
+HANYA kembalikan JSON, tanpa teks lain.`;
+
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + state.apis.groq,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      response_format: { type: 'json_object' }
+    })
+  });
+  if (!res.ok) throw new Error('Analisis Groq gagal');
+  const data = await res.json();
+  const content = data.choices[0].message.content;
   try {
-    const allVideos = [];
-    // Search for each keyword
-    for (const keyword of state.keywords.slice(0, 4)) {
-      const response = await fetch(`https://api.pexels.com/videos/search?query=${encodeURIComponent(keyword)}&per_page=6&orientation=${state.resolution === 'portrait' ? 'portrait' : 'landscape'}`, {
-        headers: { 'Authorization': state.apiKeys.pexels }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        allVideos.push(...data.videos);
-      }
-    }
-    
-    // Remove duplicates
-    const unique = [];
-    const seen = new Set();
-    for (const v of allVideos) {
-      if (!seen.has(v.id)) {
-        seen.add(v.id);
-        unique.push(v);
-      }
-    }
-    
-    state.videos = unique.slice(0, 20);
-    state.selectedVideos = [];
-    
-    renderVideoGrid();
-    
-    if (state.videos.length === 0) {
-      showToast('Info', 'Tidak ada video ditemukan, coba keyword lain', 'warning');
-    } else {
-      showToast('Video', `${state.videos.length} video ditemukan`, 'success');
-    }
-    
-  } catch (e) {
-    showToast('Error', e.message, 'error');
-    grid.innerHTML = `<div class="col-span-full text-center py-10 text-red-400">❌ ${e.message}</div>`;
+    return JSON.parse(content);
+  } catch {
+    return extractKeywordsLocal(text);
   }
-};
+}
+
+async function analyzeWithGemini(text) {
+  const prompt = `Analisis teks berikut dan ekstrak:
+1. Tema utama (1 kalimat singkat)
+2. 5-8 keywords untuk mencari video stock yang relevan (dalam bahasa Inggris)
+
+Teks: "${text.substring(0, 1500)}"
+
+Respon dalam JSON: {"theme": "...", "keywords": [...]}`;
+
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apis.gemini}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, responseMimeType: 'application/json' }
+    })
+  });
+  if (!res.ok) throw new Error('Analisis Gemini gagal');
+  const data = await res.json();
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  try {
+    return JSON.parse(content);
+  } catch {
+    return extractKeywordsLocal(text);
+  }
+}
+
+function extractKeywordsLocal(text) {
+  const words = text.toLowerCase().split(/\W+/).filter(w => w.length > 3);
+  const stop = new Set(['yang','dan','atau','untuk','dengan','dari','pada','adalah','ini','itu','the','and','or','but','in','on','at','to','of','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','should','could','can','may','might','must']);
+  const freq = {};
+  words.forEach(w => { if (!stop.has(w)) freq[w] = (freq[w]||0) + 1; });
+  const keywords = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0]);
+  return { theme: text.split('.')[0] || 'General content', keywords: keywords.length ? keywords : ['nature','city','technology','people','business'] };
+}
+
+// ============ VIDEO SEARCH ============
+async function searchVideos() {
+  const query = document.getElementById('searchQuery').value.trim();
+  if (!query) { showToast('Masukkan keyword pencarian!', 'error'); return; }
+  if (!state.apis.pexels) {
+    const k = document.getElementById('pexelsKey').value.trim();
+    if (!k) { showToast('Pexels API Key belum diisi!', 'error'); return; }
+    state.apis.pexels = k;
+  }
+
+  const grid = document.getElementById('videoGrid');
+  grid.innerHTML = '<div class="col-span-full text-center py-8"><div class="loader mx-auto"></div><p class="mt-2 text-gray-400">Mencari video...</p></div>';
+
+  try {
+    const res = await fetch(`https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=24&orientation=portrait`, {
+      headers: { 'Authorization': state.apis.pexels }
+    });
+    if (!res.ok) throw new Error('Pencarian gagal');
+    const data = await res.json();
+    state.searchResults = data.videos || [];
+    renderVideoGrid();
+    showToast(`Ditemukan ${state.searchResults.length} video!`, 'success');
+  } catch (e) {
+    grid.innerHTML = `<div class="col-span-full text-center py-8 text-red-400"><i class="fas fa-exclamation-triangle text-3xl mb-2"></i><p>${e.message}</p></div>`;
+    showToast('Error mencari video: ' + e.message, 'error');
+  }
+}
 
 function renderVideoGrid() {
   const grid = document.getElementById('videoGrid');
-  const state = window.appState;
-  
-  if (state.videos.length === 0) {
-    grid.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">Tidak ada video</div>';
+  if (state.searchResults.length === 0) {
+    grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">Tidak ada video ditemukan</div>';
     return;
   }
-  
-  grid.innerHTML = state.videos.map((v, i) => {
-    const img = v.image || (v.video_files && v.video_files[0] && v.video_files[0].link);
-    const duration = v.duration || 0;
-    const isSelected = state.selectedVideos.some(sv => sv.id === v.id);
+  grid.innerHTML = state.searchResults.map((v, i) => {
+    const thumb = v.image || '';
+    const selected = state.selectedVideos.some(sv => sv.id === v.id);
     return `
-      <div class="video-card glass-dark rounded-lg overflow-hidden ${isSelected ? 'selected' : ''}" onclick="toggleVideo(${i})">
-        <div class="relative aspect-video bg-black">
-          <img src="${v.image}" alt="${v.url}" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23333%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23666%22 font-size=%2220%22>🎥</text></svg>'">
-          <div class="absolute top-1 right-1 bg-black/70 px-1.5 py-0.5 rounded text-xs">${formatTime(duration)}</div>
-          ${isSelected ? '<div class="absolute top-1 left-1 bg-green-500 rounded-full w-6 h-6 flex items-center justify-center text-xs">✓</div>' : ''}
-        </div>
-        <div class="p-2">
-          <div class="text-xs text-gray-400 truncate">Video #${v.id}</div>
-          <div class="text-xs text-gray-500">${v.user?.name || 'Unknown'}</div>
+      <div class="video-card rounded-lg overflow-hidden ${selected ? 'selected' : ''}" onclick="toggleVideo(${i})">
+        <div class="relative aspect-[9/16] bg-black">
+          <img src="${thumb}" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'" />
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-play-circle text-3xl text-white/80"></i>
+          </div>
+          ${selected ? '<div class="absolute top-1 right-1 bg-purple-500 rounded-full w-6 h-6 flex items-center justify-center"><i class="fas fa-check text-xs"></i></div>' : ''}
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 p-1">
+            <p class="text-xs text-white truncate">${v.duration}s</p>
+          </div>
         </div>
       </div>
     `;
   }).join('');
-  
-  updateVideoStats();
 }
 
-window.toggleVideo = function(index) {
-  const state = window.appState;
-  const video = state.videos[index];
-  const existingIndex = state.selectedVideos.findIndex(v => v.id === video.id);
-  
-  if (existingIndex >= 0) {
-    state.selectedVideos.splice(existingIndex, 1);
+function toggleVideo(index) {
+  const video = state.searchResults[index];
+  const existing = state.selectedVideos.findIndex(v => v.id === video.id);
+  if (existing >= 0) {
+    state.selectedVideos.splice(existing, 1);
   } else {
-    state.selectedVideos.push(video);
-  }
-  
-  renderVideoGrid();
-  
-  if (state.selectedVideos.length > 0) {
-    document.getElementById('btnToStep5').disabled = false;
-  } else {
-    document.getElementById('btnToStep5').disabled = true;
-  }
-};
-
-window.selectAllVideos = function() {
-  const state = window.appState;
-  if (state.selectedVideos.length === state.videos.length) {
-    state.selectedVideos = [];
-  } else {
-    state.selectedVideos = [...state.videos];
+    if (state.selectedVideos.length >= 10) {
+      showToast('Maksimal 10 video!', 'error'); return;
+    }
+    // Ambil video file kualitas menengah
+    const file = video.video_files.find(f => f.quality === 'hd' && f.width && f.width <= 1080) ||
+                 video.video_files.find(f => f.quality === 'sd') ||
+                 video.video_files[0];
+    state.selectedVideos.push({
+      id: video.id,
+      url: file.link,
+      thumb: video.image,
+      duration: video.duration,
+      width: file.width,
+      height: file.height
+    });
   }
   renderVideoGrid();
-  document.getElementById('btnToStep5').disabled = state.selectedVideos.length === 0;
-};
-
-function updateVideoStats() {
-  const state = window.appState;
-  document.getElementById('selectedCount').textContent = state.selectedVideos.length;
-  const totalDuration = state.selectedVideos.reduce((sum, v) => sum + (v.duration || 0), 0);
-  document.getElementById('totalVideoDuration').textContent = formatTime(totalDuration);
+  updateSelectedCount();
 }
 
-// ============ STEP 5: AUTO EDIT ============
-window.selectResolution = function(res) {
-  window.appState.resolution = res;
-  document.querySelectorAll('.resolution-card').forEach(el => {
-    el.classList.toggle('selected', el.dataset.res === res);
-  });
-};
+function autoSelectVideos() {
+  state.selectedVideos = [];
+  const count = Math.min(6, state.searchResults.length);
+  for (let i = 0; i < count; i++) {
+    const v = state.searchResults[i];
+    const file = v.video_files.find(f => f.quality === 'hd' && f.width && f.width <= 1080) ||
+                 v.video_files.find(f => f.quality === 'sd') ||
+                 v.video_files[0];
+    state.selectedVideos.push({
+      id: v.id, url: file.link, thumb: v.image,
+      duration: v.duration, width: file.width, height: file.height
+    });
+  }
+  renderVideoGrid();
+  updateSelectedCount();
+  showToast(`${count} video auto-selected`, 'success');
+}
 
-window.startAutoEdit = async function() {
-  const state = window.appState;
+function updateSelectedCount() {
+  const el = document.getElementById('selectedCount');
+  if (el) el.textContent = state.selectedVideos.length;
+}
+
+// ============ PREVIEW ============
+let previewVideo = null;
+let previewIndex = 0;
+
+function initPreview() {
+  const canvas = document.getElementById('previewCanvas');
+  const ctx = canvas.getContext('2d');
+  // aspect ratio preview
+  const ratio = state.resolution.w / state.resolution.h;
+  canvas.width = 360;
+  canvas.height = Math.round(360 / ratio);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#fff';
+  ctx.font = '16px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('Preview Video', canvas.width/2, canvas.height/2);
+}
+
+function playPreview() {
   if (state.selectedVideos.length === 0) {
-    showToast('Error', 'Pilih video terlebih dahulu', 'error');
+    showToast('Pilih video dulu!', 'error'); return;
+  }
+  if (state.isPlaying) return;
+  state.isPlaying = true;
+  previewIndex = 0;
+  playNextClip();
+}
+
+function playNextClip() {
+  if (!state.isPlaying || previewIndex >= state.selectedVideos.length) {
+    stopPreview();
     return;
   }
-  
-  const btn = document.getElementById('btnStartEdit');
-  btn.disabled = true;
-  btn.textContent = '⏳ Memproses...';
-  
-  const progressDiv = document.getElementById('editProgress');
-  progressDiv.classList.remove('hidden');
-  const statusDiv = document.getElementById('editStatus');
-  
+  const clip = state.selectedVideos[previewIndex];
+  if (previewVideo) { previewVideo.pause(); previewVideo.remove(); }
+  previewVideo = document.createElement('video');
+  previewVideo.src = clip.url;
+  previewVideo.crossOrigin = 'anonymous';
+  previewVideo.muted = true;
+  previewVideo.playsInline = true;
+
+  const canvas = document.getElementById('previewCanvas');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('captionOverlay');
+
+  previewVideo.addEventListener('loadeddata', () => {
+    previewVideo.play();
+    if (state.transcript && document.getElementById('enableCaption').checked) {
+      const words = state.transcript.split(/\s+/);
+      const chunk = words.slice(previewIndex * 5, previewIndex * 5 + 8).join(' ');
+      overlay.textContent = chunk || '';
+      overlay.classList.remove('hidden');
+    }
+    const duration = parseInt(document.getElementById('clipDuration').value) * 1000;
+    const drawFrame = () => {
+      if (!state.isPlaying || previewVideo.paused) return;
+      ctx.drawImage(previewVideo, 0, 0, canvas.width, canvas.height);
+      requestAnimationFrame(drawFrame);
+    };
+    drawFrame();
+    setTimeout(() => {
+      previewIndex++;
+      playNextClip();
+    }, duration);
+  });
+
+  previewVideo.addEventListener('error', () => {
+    previewIndex++;
+    playNextClip();
+  });
+}
+
+function stopPreview() {
+  state.isPlaying = false;
+  if (previewVideo) { previewVideo.pause(); }
+  document.getElementById('captionOverlay').classList.add('hidden');
+}
+
+// ============ RESOLUTION ============
+function selectResolution(el, w, h, name) {
+  document.querySelectorAll('#resolutionGrid .video-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.resolution = { w, h, name };
+  showToast(`Resolusi ${name} (${w}x${h}) dipilih`, 'success');
+}
+
+function applyCustomRes() {
+  const w = parseInt(document.getElementById('customW').value) || 1080;
+  const h = parseInt(document.getElementById('customH').value) || 1920;
+  state.resolution = { w, h, name: 'Custom' };
+  document.querySelectorAll('#resolutionGrid .video-card').forEach(c => c.classList.remove('selected'));
+  showToast(`Resolusi kustom ${w}x${h} diterapkan`, 'success');
+}
+
+// ============ METADATA ============
+async function generateMetadata() {
+  if (!state.transcript) { showToast('Transkripsi belum ada!', 'error'); return; }
+  const provider = document.getElementById('aiProvider').value;
+  showToast('Generating metadata...', 'info');
+
   try {
-    // Load FFmpeg if not loaded
-    if (!state.ffmpeg) {
-      statusDiv.textContent = '📦 Loading FFmpeg...';
-      document.getElementById('editProgressBar').style.width = '10%';
-      
-      const ffmpeg = new FFmpeg();
-      
-      ffmpeg.on('log', ({ message }) => {
-        console.log('[FFmpeg]', message);
-      });
-      
-      ffmpeg.on('progress', ({ progress }) => {
-        const pct = Math.min(95, Math.max(20, 20 + progress * 70));
-        document.getElementById('editProgressBar').style.width = pct + '%';
-        document.getElementById('editProgressText').textContent = `Processing... ${Math.round(progress * 100)}%`;
-      });
-      
-      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
-      await ffmpeg.load({
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-      });
-      
-      state.ffmpeg = ffmpeg;
-      state.ffmpegLoaded = true;
+    let meta;
+    if (provider === 'groq' && state.apis.groq) {
+      meta = await genMetaGroq();
+    } else if (provider === 'gemini' && state.apis.gemini) {
+      meta = await genMetaGemini();
+    } else {
+      meta = genMetaLocal();
     }
-    
-    const ffmpeg = state.ffmpeg;
-    const res = state.resolutionMap[state.resolution];
-    
-    // Download all selected videos
-    statusDiv.textContent = '📥 Downloading videos...';
-    document.getElementById('editProgressBar').style.width = '15%';
-    
-    const videoFiles = [];
-    for (let i = 0; i < state.selectedVideos.length; i++) {
-      const v = state.selectedVideos[i];
-      // Get best quality file
-      const file = v.video_files.find(f => f.quality === 'hd' && f.width && f.width >= 1280) 
-                || v.video_files.find(f => f.quality === 'hd')
-                || v.video_files[0];
-      
-      if (!file) continue;
-      
-      document.getElementById('editProgressText').textContent = `Downloading video ${i + 1}/${state.selectedVideos.length}...`;
-      
-      try {
-        const resp = await fetch(file.link);
-        const blob = await resp.blob();
-        const ext = file.file_type.split('/')[1] || 'mp4';
-        const filename = `input${i}.${ext}`;
-        await ffmpeg.writeFile(filename, new Uint8Array(await blob.arrayBuffer()));
-        videoFiles.push({ name: filename, duration: v.duration || 5 });
-      } catch (e) {
-        console.warn('Failed to download video', i, e);
-      }
-    }
-    
-    if (videoFiles.length === 0) {
-      throw new Error('Tidak ada video yang berhasil didownload');
-    }
-    
-    // Write audio file
-    statusDiv.textContent = '🎵 Processing audio...';
-    document.getElementById('editProgressBar').style.width = '40%';
-    const audioData = new Uint8Array(await state.audioFile.arrayBuffer());
-    await ffmpeg.writeFile('input_audio.mp3', audioData);
-    
-    // Build concat file list
-    const concatList = videoFiles.map(f => `file '${f.name}'`).join('\n');
-    await ffmpeg.writeFile('concat.txt', new TextEncoder().encode(concatList));
-    
-    // Build FFmpeg command
-    statusDiv.textContent = '🎞️ Editing video...';
-    document.getElementById('editProgressBar').style.width = '50%';
-    
-    const transition = document.getElementById('transitionType').value;
-    const transDur = parseFloat(document.getElementById('transitionDuration').value);
-    const enableCaption = document.getElementById('enableCaption').checked;
-    const captionStyle = document.getElementById('captionStyle').value;
-    const enableColor = document.getElementById('enableColor').checked;
-    
-    // Simple concat first (transitions are complex, use concat for reliability)
-    const args = [
-      '-f', 'concat', '-safe', '0', '-i', 'concat.txt',
-      '-i', 'input_audio.mp3',
-      '-vf', `scale=${res.w}:${res.h}:force_original_aspect_ratio=increase,crop=${res.w}:${res.h}${enableColor ? ',eq=brightness=0.02:contrast=1.1:saturation=1.2' : ''}`,
-      '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23',
-      '-c:a', 'aac', '-b:a', '128k',
-      '-shortest',
-      '-movflags', '+faststart',
-      'output.mp4'
-    ];
-    
-    document.getElementById('editProgressText').textContent = 'Rendering video...';
-    await ffmpeg.exec(args);
-    
-    // Read output
-    statusDiv.textContent = '📦 Finalizing...';
-    document.getElementById('editProgressBar').style.width = '95%';
-    
-    const data = await ffmpeg.readFile('output.mp4');
-    const blob = new Blob([data.buffer], { type: 'video/mp4' });
-    state.finalVideoBlob = blob;
-    
-    // Setup preview
-    const previewUrl = URL.createObjectURL(blob);
-    const previewVideo = document.getElementById('previewVideo');
-    previewVideo.src = previewUrl;
-    previewVideo.classList.remove('hidden');
-    document.getElementById('previewPlaceholder').classList.add('hidden');
-    
-    // Setup final video too
-    document.getElementById('finalVideo').src = previewUrl;
-    document.getElementById('finalResolution').textContent = res.label;
-    document.getElementById('finalDuration').textContent = formatTime(state.audioDuration);
-    document.getElementById('finalSize').textContent = (blob.size / 1024 / 1024).toFixed(2) + ' MB';
-    
-    document.getElementById('editProgressBar').style.width = '100%';
-    document.getElementById('editProgressText').textContent = 'Selesai!';
-    statusDiv.textContent = '✅ Video berhasil dibuat!';
-    
-    document.getElementById('btnToStep6').disabled = false;
-    showToast('Video', 'Auto edit selesai!', 'success');
-    
+    document.getElementById('videoTitle').value = meta.title || '';
+    document.getElementById('videoDesc').value = meta.description || '';
+    document.getElementById('videoTags').value = meta.tags || '';
+    showToast('Metadata berhasil di-generate!', 'success');
   } catch (e) {
     console.error(e);
-    showToast('Error', e.message, 'error');
-    statusDiv.textContent = '❌ Error: ' + e.message;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🚀 Mulai Auto Edit';
+    const meta = genMetaLocal();
+    document.getElementById('videoTitle').value = meta.title;
+    document.getElementById('videoDesc').value = meta.description;
+    document.getElementById('videoTags').value = meta.tags;
+    showToast('Gunakan metadata fallback', 'info');
   }
-};
-
-// ============ STEP 6: SEO ============
-window.generateSEO = async function() {
-  const state = window.appState;
-  if (!state.transcription) {
-    showToast('Error', 'Transkripsi belum ada', 'error');
-    return;
-  }
-  
-  const btn = document.getElementById('btnGenerateSEO');
-  btn.disabled = true;
-  btn.textContent = '⏳ Generating...';
-  
-  const platform = document.getElementById('seoPlatform').value;
-  
-  try {
-    const prompt = `Buatkan konten SEO untuk video dengan transkrip berikut untuk platform ${platform.toUpperCase()}:
-
-Transkrip: ${state.transcription.substring(0, 1500)}
-
-Berikan dalam format JSON:
-{
-  "titles": [5 judul viral dengan hook kuat, max 70 karakter, gunakan emoji, angka, dan power words],
-  "description": "Deskripsi SEO 200-300 kata dengan hook di awal, CTA di akhir, natural keywords",
-  "hashtags": [15 hashtag relevan mix popular dan niche]
 }
 
-Rules:
-- Judul harus CLICKBAIT tapi tidak misleading
-- Gunakan power words: RAHASIA, TERBONGKAR, LUAR BIASA, WAJIB TAHU, dll
-- Hook di 3 detik pertama deskripsi
-- Bahasa Indonesia yang engaging
-- Return JSON saja, tanpa markdown`;
+async function genMetaGroq() {
+  const prompt = `Buat metadata video viral berdasarkan konten berikut:
 
-    let result = null;
-    
-    // Try Gemini
-    if (state.apiStatus.gemini) {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKeys.gemini}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.9 }
-        })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const text = data.candidates[0].content.parts[0].text;
-        const match = text.match(/\{[\s\S]*\}/);
-        if (match) result = JSON.parse(match[0]);
-      }
+Konten: "${state.transcript.substring(0, 800)}"
+Tema: ${state.theme}
+
+Buat dalam format JSON:
+{
+  "title": "Judul viral 60 karakter max dengan HOOK yang bikin penasaran (gunakan emoji, angka, atau pertanyaan)",
+  "description": "Deskripsi SEO 200-300 karakter dengan keyword di awal, CTA, dan emoji",
+  "tags": "#hashtag1 #hashtag2 #hashtag3 (10 hashtag viral relevan)"
+}
+
+HANYA kembalikan JSON.`;
+
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + state.apis.groq, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.8,
+      response_format: { type: 'json_object' }
+    })
+  });
+  const data = await res.json();
+  return JSON.parse(data.choices[0].message.content);
+}
+
+async function genMetaGemini() {
+  const prompt = `Buat metadata video viral:
+
+Konten: "${state.transcript.substring(0, 800)}"
+
+Format JSON:
+{"title": "judul viral dengan HOOK", "description": "deskripsi SEO", "tags": "#tag1 #tag2 ..."}`;
+
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apis.gemini}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.8, responseMimeType: 'application/json' }
+    })
+  });
+  const data = await res.json();
+  return JSON.parse(data.candidates[0].content.parts[0].text);
+}
+
+function genMetaLocal() {
+  const theme = state.theme || 'Konten Menarik';
+  const kw = state.keywords.slice(0, 5).join(' ');
+  return {
+    title: `ðŸ”¥ ${theme} - Yang Harus Kamu Tahu! #viral`,
+    description: `âœ¨ ${theme}. Temukan insight menarik tentang ${kw}. Jangan lupa like, comment, dan subscribe untuk konten menarik lainnya! ðŸš€`,
+    tags: state.keywords.map(k => '#' + k.replace(/\s+/g, '')).join(' ') + ' #viral #fyp #trending'
+  };
+}
+
+// ============ RENDER VIDEO ============
+async function renderVideo() {
+  if (state.selectedVideos.length === 0) { showToast('Pilih video dulu!', 'error'); return; }
+
+  const btn = document.getElementById('renderBtn');
+  const progressArea = document.getElementById('renderProgress');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+
+  btn.disabled = true;
+  progressArea.classList.remove('hidden');
+
+  const canvas = document.createElement('canvas');
+  canvas.width = state.resolution.w;
+  canvas.height = state.resolution.h;
+  const ctx = canvas.getContext('2d');
+
+  const clipDuration = parseInt(document.getElementById('clipDuration').value) * 1000;
+  const transition = document.getElementById('transitionEffect').value;
+  const enableCaption = document.getElementById('enableCaption').checked;
+  const enableFilter = document.getElementById('enableFilter').checked;
+  const captionFont = document.getElementById('captionFont').value;
+  const captionColor = document.getElementById('captionColor').value;
+
+  const stream = canvas.captureStream(30);
+
+  // Add audio track if available
+  if (state.audioUrl && document.getElementById('enableAudio').checked) {
+    try {
+      const audioEl = new Audio(state.audioUrl);
+      audioEl.crossOrigin = 'anonymous';
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      await new Promise(r => audioEl.addEventListener('canplaythrough', r, { once: true }));
+      const source = audioCtx.createMediaElementSource(audioEl);
+      const dest = audioCtx.createMediaStreamDestination();
+      source.connect(dest);
+      source.connect(audioCtx.destination);
+      dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+      audioEl.play().catch(()=>{});
+    } catch (e) { console.warn('Audio attach failed:', e); }
+  }
+
+  // Determine best mimeType
+  const mimeTypes = [
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm;codecs=vp9',
+    'video/webm;codecs=vp8',
+    'video/webm',
+    'video/mp4'
+  ];
+  const mimeType = mimeTypes.find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 5000000 });
+  const chunks = [];
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+  const totalDuration = clipDuration * state.selectedVideos.length;
+  const startTime = Date.now();
+
+  recorder.start(100);
+
+  // Load and draw each video clip
+  const words = state.transcript ? state.transcript.split(/\s+/) : [];
+
+  for (let i = 0; i < state.selectedVideos.length; i++) {
+    const clip = state.selectedVideos[i];
+    progressText.textContent = `Memproses clip ${i+1}/${state.selectedVideos.length}...`;
+    progressFill.style.width = `${((i) / state.selectedVideos.length) * 100}%`;
+
+    try {
+      await drawClip(ctx, canvas, clip, clipDuration, transition, enableFilter, enableCaption, words, i, captionFont, captionColor);
+    } catch (e) {
+      console.warn('Clip error:', e);
     }
-    
-    // Fallback to Groq
-    if (!result && state.apiStatus.groq) {
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${state.apiKeys.groq}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.9,
-          response_format: { type: 'json_object' }
-        })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        result = JSON.parse(data.choices[0].message.content);
-      }
-    }
-    
-    // Fallback template
-    if (!result) {
-      result = {
-        titles: [
-          `🔥 ${state.transcription.substring(0, 50)}... WAJIB TAHU!`,
-          `⚡ RAHASIA ${state.keywords[0] || 'INI'} TERBONGKAR!`,
-          `💡 Fakta Mengejutkan yang Jarang Orang Tahu!`,
-          `🚀 Cara ${state.keywords[0] || 'Ini'} yang Belum Banyak Orang Tahu`,
-          `✨ ${state.keywords[0] || 'Hal'} Luar Biasa yang Akan Mengubah Hidupmu`
-        ],
-        description: `🎯 ${state.transcription.substring(0, 200)}...\n\nDalam video ini, kami membahas topik yang sangat penting dan menarik. Jangan lewatkan informasi berharga ini!\n\n🔔 Subscribe dan nyalakan notifikasi untuk konten menarik lainnya!\n\n#${state.keywords.join(' #')}`,
-        hashtags: state.keywords.map(k => `#${k.replace(/\s+/g, '')}`).concat(['#viral', '#trending', '#fyp', '#foryou', '#viralvideo'])
+  }
+
+  progressText.textContent = 'Finalizing...';
+  progressFill.style.width = '100%';
+
+  await new Promise(r => setTimeout(r, 500));
+  recorder.stop();
+
+  await new Promise(resolve => {
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: mimeType.split(';')[0] });
+      state.finalBlob = blob;
+      const url = URL.createObjectURL(blob);
+      const videoEl = document.getElementById('finalVideo');
+      videoEl.src = url;
+      document.getElementById('downloadArea').classList.remove('hidden');
+      progressArea.classList.add('hidden');
+      btn.disabled = false;
+      showToast('ðŸŽ‰ Video berhasil di-render!', 'success', 5000);
+      resolve();
+    };
+  });
+}
+
+function drawClip(ctx, canvas, clip, duration, transition, enableFilter, enableCaption, words, clipIndex, captionFont, captionColor) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    video.src = clip.url;
+    video.crossOrigin = 'anonymous';
+    video.muted = true;
+    video.playsInline = true;
+
+    video.addEventListener('loadeddata', () => {
+      video.play().catch(()=>{});
+      const startTime = performance.now();
+      const w = canvas.width, h = canvas.height;
+      const caption = words.slice(clipIndex * 6, clipIndex * 6 + 8).join(' ');
+
+      const draw = () => {
+        const elapsed = performance.now() - startTime;
+        if (elapsed >= duration || video.ended) {
+          resolve();
+          return;
+        }
+
+        // Transition effects
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, w, h);
+
+        let alpha = 1;
+        let scale = 1;
+        let offsetX = 0;
+        const transitionDur = 300;
+
+        if (transition === 'fade') {
+          if (elapsed < transitionDur) alpha = elapsed / transitionDur;
+          else if (elapsed > duration - transitionDur) alpha = (duration - elapsed) / transitionDur;
+        } else if (transition === 'slide') {
+          if (elapsed < transitionDur) offsetX = w * (1 - elapsed / transitionDur);
+          else if (elapsed > duration - transitionDur) offsetX = -w * ((elapsed - (duration - transitionDur)) / transitionDur);
+        } else if (transition === 'zoom') {
+          if (elapsed < transitionDur) scale = elapsed / transitionDur;
+          else if (elapsed > duration - transitionDur) scale = (duration - elapsed) / transitionDur;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+
+        // Calculate draw rect (cover)
+        const vidRatio = video.videoWidth / video.videoHeight;
+        const canvasRatio = w / h;
+        let dw, dh, dx, dy;
+        if (vidRatio > canvasRatio) {
+          dh = h;
+          dw = h * vidRatio;
+          dx = (w - dw) / 2;
+          dy = 0;
+        } else {
+          dw = w;
+          dh = w / vidRatio;
+          dx = 0;
+          dy = (h - dh) / 2;
+        }
+
+        if (scale !== 1) {
+          ctx.translate(w/2, h/2);
+          ctx.scale(scale, scale);
+          ctx.translate(-w/2, -h/2);
+        }
+        if (offsetX !== 0) ctx.translate(offsetX, 0);
+
+        try {
+          ctx.drawImage(video, dx, dy, dw, dh);
+        } catch(e) {}
+
+        // Color filter
+        if (enableFilter) {
+          ctx.globalAlpha = 0.15;
+          ctx.fillStyle = '#667eea';
+          ctx.fillRect(0, 0, w, h);
+          ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+        }
+
+        // Caption
+        if (enableCaption && caption) {
+          const fontSize = Math.floor(w / 25);
+          ctx.font = `bold ${fontSize}px ${captionFont}`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          const lines = wrapText(ctx, caption, w * 0.85);
+          const lineH = fontSize * 1.2;
+          const startY = h * 0.82 - (lines.length - 1) * lineH / 2;
+
+          lines.forEach((line, idx) => {
+            const y = startY + idx * lineH;
+            // Stroke
+            ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+            ctx.lineWidth = fontSize / 8;
+            ctx.strokeText(line, w/2, y);
+            // Fill
+            ctx.fillStyle = captionColor;
+            ctx.fillText(line, w/2, y);
+          });
+        }
+
+        ctx.restore();
+        requestAnimationFrame(draw);
       };
+      draw();
+    });
+
+    video.addEventListener('error', () => {
+      console.warn('Video load error for clip');
+      resolve();
+    });
+
+    setTimeout(() => resolve(), duration + 500);
+  });
+}
+
+function wrapText(ctx, text, maxWidth) {
+  const words = text.split(' ');
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    const test = line ? line + ' ' + word : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
     }
-    
-    state.seoData = result;
-    
-    // Display titles
-    const titlesList = document.getElementById('titlesList');
-    titlesList.innerHTML = result.titles.map((t, i) => `
-      <div class="flex items-center gap-2 bg-black/30 rounded-lg p-3 hover:bg-black/50 transition cursor-pointer" onclick="selectTitle(${i})">
-        <input type="radio" name="title" ${i === 0 ? 'checked' : ''} class="accent-purple-500">
-        <span class="flex-1 text-sm">${t}</span>
-        <button onclick="event.stopPropagation(); navigator.clipboard.writeText('${t.replace(/'/g, "\\'")}'); showToast('Copy', 'Judul disalin', 'success')" class="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded">📋</button>
-      </div>
-    `).join('');
-    
-    // Display description
-    document.getElementById('seoDescription').textContent = result.description;
-    
-    // Display hashtags
-    const hashtagsList = document.getElementById('hashtagsList');
-    hashtagsList.innerHTML = result.hashtags.map(h => `
-      <span class="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-sm cursor-pointer hover:bg-purple-500/40" onclick="navigator.clipboard.writeText('${h}'); showToast('Copy', 'Hashtag disalin', 'success')">${h}</span>
-    `).join('');
-    
-    // Random SEO scores
-    document.getElementById('seoScore1').textContent = 85 + Math.floor(Math.random() * 15);
-    document.getElementById('seoScore2').textContent = 80 + Math.floor(Math.random() * 20);
-    document.getElementById('seoScore3').textContent = 85 + Math.floor(Math.random() * 15);
-    document.getElementById('seoScore4').textContent = 82 + Math.floor(Math.random() * 18);
-    
-    document.getElementById('seoResults').classList.remove('hidden');
-    document.getElementById('btnToStep7').disabled = false;
-    
-    showToast('SEO', 'Judul & deskripsi berhasil di-generate', 'success');
-    
-  } catch (e) {
-    showToast('Error', e.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🎯 Generate Judul & Deskripsi SEO';
   }
-};
+  if (line) lines.push(line);
+  return lines;
+}
 
-window.selectTitle = function(index) {
-  const radios = document.querySelectorAll('input[name="title"]');
-  radios.forEach((r, i) => r.checked = i === index);
-};
-
-window.copyAllTitles = function() {
-  const titles = window.appState.seoData.titles.join('\n');
-  navigator.clipboard.writeText(titles).then(() => {
-    showToast('Copy', 'Semua judul disalin', 'success');
-  });
-};
-
-window.copyDescription = function() {
-  navigator.clipboard.writeText(window.appState.seoData.description).then(() => {
-    showToast('Copy', 'Deskripsi disalin', 'success');
-  });
-};
-
-// ============ STEP 7: DOWNLOAD ============
-window.downloadVideo = function() {
-  const state = window.appState;
-  if (!state.finalVideoBlob) {
-    showToast('Error', 'Video belum dibuat', 'error');
-    return;
-  }
-  
-  const url = URL.createObjectURL(state.finalVideoBlob);
+// ============ DOWNLOAD ============
+function downloadVideo() {
+  if (!state.finalBlob) { showToast('Video belum di-render!', 'error'); return; }
+  const ext = state.finalBlob.type.includes('mp4') ? 'mp4' : 'webm';
+  const url = URL.createObjectURL(state.finalBlob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `ai-video-${Date.now()}.mp4`;
+  a.download = `ai-video-${Date.now()}.${ext}`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  
-  showToast('Download', 'Video sedang didownload...', 'success');
-};
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('Video sedang didownload!', 'success');
+}
 
-window.downloadCaption = function() {
-  const state = window.appState;
-  if (!state.transcriptionSegments || state.transcriptionSegments.length === 0) {
-    showToast('Error', 'Tidak ada caption', 'error');
-    return;
-  }
-  
-  let srt = '';
-  state.transcriptionSegments.forEach((seg, i) => {
-    const start = formatSRTTime(seg.start || seg.start_time || 0);
-    const end = formatSRTTime(seg.end || seg.end_time || 0);
-    srt += `${i + 1}\n${start} --> ${end}\n${seg.text || seg.text || ''}\n\n`;
-  });
-  
-  const blob = new Blob([srt], { type: 'text/plain' });
+function downloadMetadata() {
+  const title = document.getElementById('videoTitle').value;
+  const desc = document.getElementById('videoDesc').value;
+  const tags = document.getElementById('videoTags').value;
+  const text = `JUDUL VIDEO:\n${title}\n\nDESKRIPSI:\n${desc}\n\nTAGS/HASHTAGS:\n${tags}\n\nPLATFORM: ${state.resolution.name}\nRESOLUSI: ${state.resolution.w}x${state.resolution.h}\nDIBUAT: ${new Date().toLocaleString('id-ID')}`;
+  const blob = new Blob([text], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `caption-${Date.now()}.srt`;
-  document.body.appendChild(a);
+  a.download = `metadata-${Date.now()}.txt`;
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  
-  showToast('Download', 'Caption SRT didownload', 'success');
-};
-
-function formatSRTTime(seconds) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-  const ms = Math.floor((seconds % 1) * 1000);
-  return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')},${ms.toString().padStart(3,'0')}`;
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('Metadata didownload!', 'success');
 }
 
-window.copyMetadata = function() {
-  const state = window.appState;
-  if (!state.seoData) {
-    showToast('Error', 'SEO belum di-generate', 'error');
-    return;
-  }
-  
-  const selectedTitle = document.querySelector('input[name="title"]:checked');
-  const titleIndex = selectedTitle ? Array.from(document.querySelectorAll('input[name="title"]')).indexOf(selectedTitle) : 0;
-  const title = state.seoData.titles[titleIndex];
-  
-  const text = `${title}\n\n${state.seoData.description}\n\n${state.seoData.hashtags.join(' ')}`;
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('Copy', 'Metadata disalin ke clipboard', 'success');
-  });
-};
+// ============ RESET ============
+function resetApp() {
+  if (!confirm('Reset semua data dan buat video baru?')) return;
+  state.audioFile = null;
+  if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
+  state.audioUrl = null;
+  state.transcript = '';
+  state.keywords = [];
+  state.theme = '';
+  state.searchResults = [];
+  state.selectedVideos = [];
+  state.finalBlob = null;
 
-window.shareTo = function(platform) {
-  const state = window.appState;
-  if (!state.finalVideoBlob) {
-    showToast('Error', 'Video belum dibuat', 'error');
-    return;
-  }
-  
-  const urls = {
-    tiktok: 'https://www.tiktok.com/upload',
-    instagram: 'https://www.instagram.com/',
-    youtube: 'https://studio.youtube.com/',
-    facebook: 'https://www.facebook.com/'
-  };
-  
-  // Copy metadata first
-  window.copyMetadata();
-  
-  setTimeout(() => {
-    window.open(urls[platform], '_blank');
-    showToast('Share', `Metadata sudah disalin. Upload video ke ${platform}!`, 'info');
-  }, 500);
-};
-
-window.resetApp = function() {
-  if (confirm('Reset aplikasi? Semua data akan hilang.')) {
-    location.reload();
-  }
-};
-
-// Expose functions to window
-window.generateWaveform = generateWaveform;
-window.renderVideoGrid = renderVideoGrid;
-window.updateVideoStats = updateVideoStats;
-window.formatSRTTime = formatSRTTime;
-
+  document.getElementById('manualText').value = '';
+  document.getElementById('transcribeContent').innerHTML = '<span class="text-gray-500 italic">Belum ada transkripsi.</span>';
+  document.getElementById('themeContent').innerHTML = '<span class="text-gray-500 italic">Belum dianalisis</span>';
+  document.getElementById('searchQuery').value = '';
+  document.getElementById('videoTitle').value = '';
+  document.getElementById('videoDesc').value = '';
+  document.getElementById('videoTags').value = '';
+  document.getElementById('downloadArea').classList.add('hidden');
+  removeAudio();
+  goToStep(1);
+  showToast('Aplikasi direset!', 'info');
+}
 </script>
-
 </body>
 </html>
